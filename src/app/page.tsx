@@ -4,7 +4,12 @@ import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring } from "motion/react";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import Image from "next/image";
-import { Lightbulb, MessageSquareQuote, Zap } from "lucide-react";
+import {
+  BatteryCharging,
+  Lightbulb,
+  MessageSquareQuote,
+  Zap,
+} from "lucide-react";
 import { BentoGrid, BentoGridItem } from "@/components/bento-grid";
 import TextReveal from "@/components/text-reveal";
 
@@ -125,6 +130,7 @@ export default function HomePage() {
 
       <section
         className="h-screen w-full bg-primary gap-20 px-96 flex flex-col justify-center"
+        id="mission-section"
         style={{ position: "relative" }}
       >
         <TextReveal textItems={textItems} pixelsPerWord={10} revealOffset={0} />
@@ -220,44 +226,26 @@ function ProjectsGrid() {
     {
       title: "Makerspace",
       description: "Explore the endless capabilities of our workshops.",
-      header: <Skeleton />,
+      header: <BentoImage src="/makerspace.png" />,
       icon: <Lightbulb className="h-4 w-4 text-neutral-500" />,
     },
     {
       title: "Washington Clean Energey Testbeds",
       description: "We collaborate with WCET to create better products.",
-      header: <Skeleton />,
+      header: <BentoImage src="/wcet.png" />,
       icon: <Zap className="h-4 w-4 text-neutral-500" />,
     },
     {
       title: "Consulting",
       description: "We can help you find the most effective solution for you.",
-      header: <Skeleton />,
+      header: <BentoImage src="/consulting.png" />,
       icon: <MessageSquareQuote className="h-4 w-4 text-neutral-500" />,
     },
     {
       title: "Other Projects",
       description: "Batteries, Solar, Fuel Cells, and more!",
-      header: <Skeleton />,
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="lucide lucide-battery-charging-icon lucide-battery-charging h-4 w-4 text-neutral-500"
-        >
-          <path d="M15 7h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2" />
-          <path d="M6 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h1" />
-          <path d="m11 7-3 5h4l-3 5" />
-          <line x1="22" x2="22" y1="11" y2="13" />
-        </svg>
-      ),
+      header: <BentoImage src="/other.png" />,
+      icon: <BatteryCharging className="h-4 w-4 text-neutral-500" />,
     },
   ];
 
@@ -277,6 +265,10 @@ function ProjectsGrid() {
   );
 }
 
-const Skeleton = () => (
-  <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100"></div>
+const BentoImage = ({ src }: { src?: string }) => (
+  <div className="relative flex w-full h-full min-h-[6rem] rounded-xl overflow-hidden border border-primary-foreground bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100">
+    {src && (
+      <Image src={src} alt="project image" fill className="object-cover" />
+    )}
+  </div>
 );

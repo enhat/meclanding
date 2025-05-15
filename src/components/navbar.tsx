@@ -15,6 +15,20 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
+type ScrollSection = {
+  id: string;
+  title: string;
+  href: string;
+  description: string;
+  offset?: number;
+};
+
+const getScrollOffsets = () => {
+  return {
+    'mission-section': 270,
+  };
+};
+
 const components: { title: string; href: string; description: string }[] = [
   {
     title: 'RD&D Consulting',
@@ -33,24 +47,44 @@ const components: { title: string; href: string; description: string }[] = [
   },
 ];
 
+const scrollSections: ScrollSection[] = [
+  {
+    id: 'services-section',
+    title: 'Our Projects',
+    href: '#services-section',
+    description: 'Pioneering work in clean energy technologies',
+  },
+  {
+    id: 'mission-section',
+    title: 'Our Mission',
+    href: '#mission-section',
+    description: 'Our commitment to sustainable innovation',
+    offset: getScrollOffsets()['mission-section'],
+  },
+];
+
 const email = 'example@example.com';
-const subject = 'Hello';
-const body = 'I wanted to reach out about...';
+const subject = '';
+const body = '';
 const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
 const ListItem = React.forwardRef<
   React.ElementRef<typeof Link>,
-  React.ComponentPropsWithoutRef<typeof Link> & { title: string }
->(({ className, title, children, href, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof Link> & {
+    title: string;
+    onClick?: (e: React.MouseEvent) => void;
+  }
+>(({ className, title, children, href, onClick, ...props }, ref) => (
   <li>
     <NavigationMenuLink asChild>
       <Link
         ref={ref}
         href={href!}
         className={cn(
-          'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+          'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground ',
           className,
         )}
+        onClick={onClick}
         {...props}
       >
         <div className='text-sm font-medium leading-none'>{title}</div>
@@ -67,6 +101,76 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const pathname = usePathname();
   const isHome = pathname === '/';
+  const [hasLoaded, setHasLoaded] = React.useState(false);
+
+  const scrollWithOffset = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      const offsets = getScrollOffsets();
+      const offset = offsets[sectionId] || 0;
+
+      const sectionPosition = section.getBoundingClientRect().top;
+      const offsetPosition = sectionPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  React.useEffect(() => {
+    setHasLoaded(true);
+
+    if (isHome && window.location.hash) {
+      const sectionId = window.location.hash.substring(1);
+
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      setTimeout(() => {
+        scrollWithOffset(sectionId);
+      }, 500);
+
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  }, [isHome]);
+
+  const scrollToSection = (sectionId: string) => {
+    scrollWithOffset(sectionId);
+  };
+
+  const handleSectionClick = (e: React.MouseEvent, sectionId: string) => {
+    e.preventDefault();
+    scrollToSection(sectionId);
+  };
+
+  const handleExternalSectionClick = (
+    e: React.MouseEvent,
+    sectionId: string,
+  ) => {
+    e.preventDefault();
+
+    const targetUrl = '/';
+    window.location.href = targetUrl;
+
+    sessionStorage.setItem('scrollTarget', sectionId);
+  };
+
+  React.useEffect(() => {
+    if (isHome && hasLoaded) {
+      const scrollTarget = sessionStorage.getItem('scrollTarget');
+
+      if (scrollTarget) {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+        setTimeout(() => {
+          scrollWithOffset(scrollTarget);
+          sessionStorage.removeItem('scrollTarget');
+        }, 500);
+      }
+    }
+  }, [isHome, hasLoaded]);
 
   return (
     <nav
@@ -77,7 +181,6 @@ export default function Navbar() {
     >
       <div className='px-56 w-full h-28'>
         <div className='flex items-center justify-between h-full'>
-          {/* Logo */}
           <Link
             href='/'
             className={cn(
@@ -88,7 +191,6 @@ export default function Navbar() {
             mec
           </Link>
 
-          {/* Desktop Navigation */}
           <div className='hidden md:block'>
             <NavigationMenu>
               <NavigationMenuList>
@@ -121,15 +223,25 @@ export default function Navbar() {
                             </Link>
                           </NavigationMenuLink>
                         </li>
-                        <ListItem href='/about/mission' title='Our Mission'>
-                          Our commitment to sustainable innovation
-                        </ListItem>
                         <ListItem href='/team' title='Who We Are'>
                           Meet the passionate team behind MEC
                         </ListItem>
-                        <ListItem href='/about/projects' title='Our Projects'>
-                          Pioneering work in clean energy technologies
-                        </ListItem>
+                        {scrollSections.map((section) => (
+                          <ListItem
+                            key={section.id}
+                            href={isHome ? section.href : '/'}
+                            title={section.title}
+                            onClick={(e) => {
+                              if (isHome) {
+                                handleSectionClick(e, section.id);
+                              } else {
+                                handleExternalSectionClick(e, section.id);
+                              }
+                            }}
+                          >
+                            {section.description}
+                          </ListItem>
+                        ))}
                       </ul>
                     </NavigationMenuContent>
                   </AnimatePresence>
@@ -175,7 +287,6 @@ export default function Navbar() {
             </Link>
           </span>
 
-          {/* Mobile Menu Toggle */}
           <div className='md:hidden'>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -185,7 +296,6 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Mobile Menu */}
           <AnimatePresence>
             {isMenuOpen && (
               <motion.div
@@ -216,6 +326,39 @@ export default function Navbar() {
                   >
                     Services
                   </Link>
+                  <Link
+                    href='/team'
+                    className={cn(
+                      'block py-2 hover:bg-accent',
+                      !isHome && 'text-primary-foreground',
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Our Team
+                  </Link>
+
+                  {scrollSections.map((section) => (
+                    <Link
+                      key={section.id}
+                      href={isHome ? section.href : '/'}
+                      className={cn(
+                        'block py-2 hover:bg-accent',
+                        !isHome && 'text-primary-foreground',
+                      )}
+                      onClick={(e) => {
+                        if (isHome) {
+                          handleSectionClick(e, section.id);
+                          setIsMenuOpen(false);
+                        } else {
+                          handleExternalSectionClick(e, section.id);
+                          setIsMenuOpen(false);
+                        }
+                      }}
+                    >
+                      {section.title}
+                    </Link>
+                  ))}
+
                   <Link
                     href='/contact'
                     className={cn(

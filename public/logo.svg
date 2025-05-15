@@ -1,0 +1,21 @@
+<svg
+  width="2510"
+  height="2510"
+  viewBox="0 0 2510 2510"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xml:space="preserve"
+  overflow="hidden"
+>
+  <g transform="translate(0, 370)">
+    <path d="M1282.88 1628.61C1103.76 1212.08 1296.43 729.683 1713.21 551.147 2129.99 372.611 2613.06 565.546 2792.17 982.079 2799.36 998.799 2805.99 1015.75 2812.06 1032.91Z" stroke="#000000" stroke-width="27.5" stroke-miterlimit="8" fill="#FFFFFF" fill-rule="evenodd"/>
+    <path d="M2855.34 1068.21C3015.93 1505.62 2791.52 1990.41 2354.11 2151 1916.69 2311.59 1431.91 2087.18 1271.32 1649.77 1265.14 1632.94 1259.5 1615.92 1254.4 1598.73Z" stroke="#000000" stroke-width="6.875" stroke-miterlimit="8" fill-rule="evenodd"/>
+    <path d="M2218.35 2199.86C1765.53 2289.25 1322.86 1978.9 1229.64 1506.66 1136.41 1034.43 1427.93 579.135 1880.75 489.74 2333.58 400.346 2776.25 710.701 2869.47 1182.94 2962.7 1655.17 2671.18 2110.46 2218.35 2199.86Z" stroke="#000000" stroke-width="27.5" stroke-miterlimit="8" fill="none" fill-rule="evenodd"/>
+    <text font-family="Aptos,Aptos_MSFontService,sans-serif" font-style="italic" font-weight="700" font-size="248" transform="matrix(0.939693 -0.34202 0.34202 0.939693 1448.3 1241)">MADDEN</text>
+    <text fill="#FFFFFF" font-family="Aptos,Aptos_MSFontService,sans-serif" font-style="italic" font-weight="700" font-size="165" transform="matrix(0.913545 -0.406737 0.406737 0.913545 1795.43 2005)">CONSULTING</text>
+    <path d="M864.911 1567.8 2299.05 1056.82 2406.23 1285.71 970.668 1849.44 864.911 1567.8Z" stroke="#00B050" stroke-width="6.875" stroke-miterlimit="8" fill="#00B050" fill-rule="evenodd"/>
+    <path d="M1729.13 1341.1 3083.13 924.361 3030.36 808.942 3363.22 883.516 3168.8 1136.38 3133.18 1058.47 1805.12 1655.23 1729.13 1341.1Z" stroke="#00B050" stroke-width="6.875" stroke-miterlimit="8" fill="#00B050" fill-rule="evenodd"/>
+    <text fill="#FFFFFF" font-family="Aptos,Aptos_MSFontService,sans-serif" font-style="italic" font-weight="700" font-size="165" transform="matrix(0.941886 -0.335932 0.335932 0.941886 1218.84 1634)">ELECTRO</text>
+    <text fill="#FFFFFF" font-family="Aptos,Aptos_MSFontService,sans-serif" font-style="italic" font-weight="700" font-size="165" transform="matrix(0.915522 -0.402268 0.402268 0.915522 1931.26 1564)">CHEMICAL</text>
+  </g>
+</svg>
