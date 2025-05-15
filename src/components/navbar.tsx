@@ -23,7 +23,7 @@ type ScrollSection = {
   offset?: number;
 };
 
-const getScrollOffsets = () => {
+const getScrollOffsets = (): Record<string, number> => {
   return {
     'mission-section': 270,
   };
