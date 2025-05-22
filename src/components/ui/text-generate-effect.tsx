@@ -8,15 +8,16 @@ export const TextGenerateEffect = ({
   className,
   filter = true,
   duration = 0.5,
+  staggerDur = 0.075,
   onComplete,
 }: {
   words: string;
   className?: string;
   filter?: boolean;
   duration?: number;
+  staggerDur?: number;
   onComplete?: () => void;
 }) => {
-  const staggerDur = 0.15;
   const [scope, animate] = useAnimate();
   const wordsArray = words.split(' ');
   const timeoutId = useRef<NodeJS.Timeout | null>(null); // Ref for the timeout
@@ -74,11 +75,5 @@ export const TextGenerateEffect = ({
     </motion.div>
   );
 
-  return (
-    <div className={cn('font-bold', className)}>
-      <div className='mt-4'>
-        <div className='dark:text-white text-black '>{renderWords()}</div>
-      </div>
-    </div>
-  );
+  return <div className={cn(className)}>{renderWords()}</div>;
 };

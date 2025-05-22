@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring } from "motion/react";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import Image from "next/image";
@@ -14,15 +14,81 @@ import { BentoGrid, BentoGridItem } from "@/components/bento-grid";
 import TextReveal from "@/components/text-reveal";
 
 export default function HomePage() {
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { scrollY } = useScroll();
 
-  // Offset by -20 to prevent jank on reload when scrolled
   const pic1RawX = useTransform(scrollY, [-20, 500], [0, 550]);
   const pic2RawX = useTransform(scrollY, [-20, 500], [0, 720]);
 
   const pic1X = useSpring(pic1RawX, { damping: 20, stiffness: 80 });
   const pic2X = useSpring(pic2RawX, { damping: 20, stiffness: 80 });
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const ensureVideoPlays = async () => {
+      try {
+        if (video.readyState >= 2) {
+          await video.play();
+        } else {
+          video.addEventListener(
+            "canplay",
+            async () => {
+              try {
+                await video.play();
+              } catch (error) {
+                console.log("Video play failed:", error);
+              }
+            },
+            { once: true },
+          );
+        }
+      } catch (error) {
+        console.log("Video play failed:", error);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && video.paused) {
+        ensureVideoPlays();
+      }
+    };
+
+    const handleFocus = () => {
+      if (video.paused) {
+        ensureVideoPlays();
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && video.paused) {
+            ensureVideoPlays();
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    if (video) {
+      observer.observe(video);
+    }
+
+    const timer = setTimeout(ensureVideoPlays, 100);
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
 
   const textItems = [
     {
@@ -35,13 +101,16 @@ export default function HomePage() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video
+            ref={videoRef}
             autoPlay
             loop
             muted
             playsInline
+            preload="auto"
             className="w-full h-full object-cover"
           >
             <source src="/dither.webm" type="video/webm" />
+            <source src="/dither.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
@@ -60,21 +129,24 @@ export default function HomePage() {
           </svg>
         </div>
 
-        <div className="w-full h-screen z-20 flex">
-          <div className="w-1/2 h-screen absolute left-0 flex flex-col pl-56 pr-16 gap-16 pt-44 ">
-            <TextGenerateEffect
-              className="text-9xl text-primary font-outline font-bold"
-              words="Turn your ideas into reality"
-            />
-            <span className="text-muted text-2xl leading-relaxed">
-              Madden Electrochemical Consulting helps innovators turn ideas into
-              sustainable energy solutions, from R&D to production, with expert
-              electrochemistry and recycling strategies.
-            </span>
-            <HoverAnimatedButton />
-          </div>
+        <div className="w-full h-screen z-20 flex xl:mt-20 2xl:mt-0">
+          <div className="2xl:w-1/2 w-full h-screen flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 px-16 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal pt-44">
+            <div className="flex flex-col gap-16 2xl:w-full xl:w-3/4 w-full">
+              <TextGenerateEffect
+                className="2xl:text-9xl xl:text-7xl md:text-6xl sm:text-5xl text-4xl text-primary font-outline font-bold text-center 2xl:text-left"
+                words="Turn your ideas into reality."
+              />
+              <TextGenerateEffect
+                className="text-muted 2xl:text-2xl xl:text-lg lg:text-md text-sm leading-relaxed 2xl:text-left text-center"
+                words="Madden Electrochemical Consulting helps inventors turn ideas into sustainable energy solutions, from R&D to production, with expert electrochemistry and recycling strategies."
+                duration={0.25}
+                staggerDur={0.05}
+              />
 
-          <div className="w-1/2 h-screen absolute right-0 z-40 flex items-center justify-center">
+              <HoverAnimatedButton />
+            </div>
+          </div>
+          <div className="w-1/2 h-screen absolute right-0 z-40 2xl:flex items-center justify-center hidden">
             <motion.div
               className="absolute"
               style={{ top: "22%", right: "25%" }}

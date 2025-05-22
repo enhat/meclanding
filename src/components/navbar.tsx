@@ -179,7 +179,7 @@ export default function Navbar() {
         !isHome && 'text-primary-foreground',
       )}
     >
-      <div className='px-56 w-full h-28'>
+      <div className='2xl:px-56 p-20 w-full h-28'>
         <div className='flex items-center justify-between h-full'>
           <Link
             href='/'
