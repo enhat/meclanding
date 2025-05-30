@@ -176,7 +176,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
     hidden: {
       y: 10,
       opacity: 0.3,
-      filter: 'blur(4px)',
+      filter: 'blur(0px)',
       transition: { duration: 0.3 },
     },
     visible: {
@@ -193,7 +193,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
       x: -40,
       opacity: 0,
       scale: 0.5,
-      filter: 'blur(4px)',
+      filter: 'blur(0px)',
     },
     animate: {
       y: 0,
@@ -235,7 +235,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
   const contactTextVariants = {
     hidden: {
       x: 0,
-      filter: 'blur(4px)',
+      filter: 'blur(0px)',
       opacity: 0.3,
       transition: {
         type: 'spring',
