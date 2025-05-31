@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { LucideIcon, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface TextItem {
   text: string;
@@ -20,23 +21,29 @@ interface ProcessedTextItem {
 
 interface TextRevealProps {
   textItems?: TextItem[];
-  iconSize?: number;
+  iconSize?: number | 'auto'; // Allow 'auto' for adaptive sizing
+  iconSizeMultiplier?: number; // Multiplier for auto sizing (default 1.2)
   className?: string;
-  textSize?: string;
   pixelsPerWord?: number;
   revealOffset?: number;
+  leading?: 'tight' | 'snug' | 'normal' | 'relaxed' | 'loose' | string;
+  underlineThickness?: 'thin' | 'normal' | 'thick' | 'auto';
 }
 
 const TextReveal: React.FC<TextRevealProps> = ({
   textItems = [],
-  iconSize = 36,
-  className = 'w-full',
-  textSize = 'text-5xl',
+  iconSize = 'auto',
+  iconSizeMultiplier = 1,
+  className,
   pixelsPerWord = 15,
   revealOffset = 0,
+  leading = 'normal',
+  underlineThickness = 'auto',
 }) => {
   const [visibleWordCount, setVisibleWordCount] = useState(0);
+  const [computedIconSize, setComputedIconSize] = useState(24);
   const componentRef = useRef<HTMLDivElement>(null);
+  const textMeasureRef = useRef<HTMLSpanElement>(null);
   const initializedRef = useRef(false);
   const [hoveredItems, setHoveredItems] = useState<{
     [key: number]: boolean;
@@ -49,6 +56,51 @@ const TextReveal: React.FC<TextRevealProps> = ({
 
   // Track previous visibility state to detect when items leave and re-enter view
   const previouslyVisibleRef = useRef<Set<number>>(new Set());
+
+  // Helper function to get appropriate leading class
+  const getLeadingClass = (leading: string) => {
+    const leadingMap: { [key: string]: string } = {
+      tight: 'leading-tight',
+      snug: 'leading-snug',
+      normal: 'leading-normal',
+      relaxed: 'leading-relaxed',
+      loose: 'leading-loose',
+    };
+
+    return leadingMap[leading] || leading;
+  };
+
+  // Helper function to get underline thickness based on text size
+  const getUnderlineStyle = (thickness: string) => {
+    if (thickness === 'auto') {
+      // Auto-scaling based on font size using em units
+      return {
+        height: '0.08em',
+        bottom: '-0.15em',
+      };
+    }
+
+    const thicknessMap: { [key: string]: { height: string; bottom: string } } =
+      {
+        thin: { height: '1px', bottom: '-4px' },
+        normal: { height: '2px', bottom: '-6px' },
+        thick: { height: '4px', bottom: '-8px' },
+      };
+
+    return thicknessMap[thickness] || thicknessMap.normal;
+  };
+
+  // Calculate icon size based on text size
+  useEffect(() => {
+    if (iconSize === 'auto' && textMeasureRef.current) {
+      const computedStyle = window.getComputedStyle(textMeasureRef.current);
+      const fontSize = parseFloat(computedStyle.fontSize);
+      const newIconSize = Math.round(fontSize * iconSizeMultiplier);
+      setComputedIconSize(newIconSize);
+    } else if (typeof iconSize === 'number') {
+      setComputedIconSize(iconSize);
+    }
+  }, [iconSize, iconSizeMultiplier, className]);
 
   const processTextItems = (items: TextItem[]): ProcessedTextItem[] => {
     const processed: ProcessedTextItem[] = [];
@@ -166,7 +218,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
   }, [visibleWordCount, processedText]);
 
   if (allWords.length === 0) {
-    return <div className={className} ref={componentRef}></div>;
+    return <div className={cn('w-full', className)} ref={componentRef}></div>;
   }
 
   const isContactComponent =
@@ -245,7 +297,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
       },
     },
     visible: {
-      x: 50,
+      x: computedIconSize + 10, // Adjust text offset based on icon size
       filter: 'blur(0px)',
       opacity: 1,
       transition: {
@@ -283,14 +335,25 @@ const TextReveal: React.FC<TextRevealProps> = ({
     return (
       <IconComponent
         className='transition-all duration-300'
-        size={iconSize}
+        size={computedIconSize}
         strokeWidth={2}
       />
     );
   };
 
+  const underlineStyle = getUnderlineStyle(underlineThickness);
+
   const content = (
-    <div className='leading-[4]'>
+    <div className={getLeadingClass(leading)}>
+      {/* Hidden text element for measuring font size */}
+      <span
+        ref={textMeasureRef}
+        className={cn('opacity-0 absolute pointer-events-none', className)}
+        aria-hidden='true'
+      >
+        M
+      </span>
+
       {processedText.map((item, itemIndex) => {
         const startWordIndex = processedText
           .slice(0, itemIndex)
@@ -312,7 +375,10 @@ const TextReveal: React.FC<TextRevealProps> = ({
             <motion.a
               key={itemIndex}
               href={item.mailto ? `mailto:${item.mailto}` : undefined}
-              className={`inline-flex relative items-center mx-1 ${textSize} text-primary-foreground cursor-pointer`}
+              className={cn(
+                'inline-flex relative items-center mx-1 text-primary-foreground cursor-pointer',
+                className,
+              )}
               onMouseEnter={() => {
                 setHoveredItems((prev) => ({ ...prev, [itemIndex]: true }));
               }}
@@ -330,7 +396,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
               <div
                 style={{
                   width: `0px`,
-                  height: `${iconSize}px`,
+                  height: `${computedIconSize}px`,
                 }}
               >
                 <AnimatePresence>
@@ -358,7 +424,11 @@ const TextReveal: React.FC<TextRevealProps> = ({
                 <AnimatePresence>
                   {isHighlighted && (
                     <motion.span
-                      className='absolute bottom-[-8px] left-0 h-1 bg-primary-foreground'
+                      className='absolute left-0 bg-primary-foreground'
+                      style={{
+                        height: underlineStyle.height,
+                        bottom: underlineStyle.bottom,
+                      }}
                       initial='initial'
                       animate='animate'
                       exit='exit'
@@ -377,14 +447,17 @@ const TextReveal: React.FC<TextRevealProps> = ({
             <React.Fragment key={itemIndex}>
               <motion.span
                 key={itemIndex}
-                className={`inline-block ${textSize} text-primary-foreground`}
+                className={cn(
+                  'inline-block text-primary-foreground',
+                  className,
+                )}
                 variants={textVariants}
                 initial='hidden'
                 animate={isHighlighted ? 'visible' : 'hidden'}
               >
                 {word}
               </motion.span>
-              <span className={`${textSize}`}> </span>
+              <span className={className}> </span>
             </React.Fragment>
           );
         }
@@ -395,7 +468,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
   if (isContactComponent) {
     return (
       <motion.div
-        className={className}
+        className={cn('w-full', className)}
         ref={componentRef}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -408,7 +481,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
   }
 
   return (
-    <div className={className} ref={componentRef}>
+    <div className={cn('w-full', className)} ref={componentRef}>
       {content}
     </div>
   );

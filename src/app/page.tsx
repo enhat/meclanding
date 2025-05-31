@@ -130,7 +130,7 @@ export default function HomePage() {
         </div>
 
         <div className="w-full h-screen z-20 flex xl:mt-20 2xl:mt-0">
-          <div className="2xl:w-1/2 w-full h-screen flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 px-16 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal pt-44">
+          <div className="2xl:w-1/2 w-full h-screen flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 md:px-20 px-8 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal pt-44">
             <div className="flex flex-col gap-16 2xl:w-full xl:w-3/4 w-full">
               <TextGenerateEffect
                 className="2xl:text-9xl xl:text-7xl md:text-6xl sm:text-5xl text-4xl text-primary font-outline font-bold text-center 2xl:text-left"
@@ -187,13 +187,13 @@ export default function HomePage() {
       </section>
 
       <section
-        className="h-screen w-full bg-primary px-56 flex flex-col justify-center"
+        className="h-screen w-full bg-primary 2xl:px-56 md:px-20 px-8 flex flex-col justify-center"
         id="services-section"
       >
         <h2 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6">
           Our Services
         </h2>
-        <p className="text-primary-foreground text-lg mb-10 md:w-1/2">
+        <p className="text-primary-foreground text-lg mb-10 lg:w-1/2">
           Efficient. Impactful. Sustainable. We optimize energy, cut carbon, and
           drive independence for a greener future.
         </p>
@@ -201,11 +201,16 @@ export default function HomePage() {
       </section>
 
       <section
-        className="h-screen w-full bg-primary gap-20 px-96 flex flex-col justify-center"
+        className="h-screen w-full bg-primary gap-20 md:px-20 px-8 2xl:px-96 flex flex-col justify-center"
         id="mission-section"
         style={{ position: "relative" }}
       >
-        <TextReveal textItems={textItems} pixelsPerWord={10} revealOffset={0} />
+        <TextReveal
+          textItems={textItems}
+          pixelsPerWord={10}
+          revealOffset={0}
+          className="text-2xl md:text-4xl lg:text-5xl leading-loose md:leading-relaxed"
+        />
         <TextReveal
           textItems={[
             {
@@ -214,7 +219,8 @@ export default function HomePage() {
               mailto: "example@email.com",
             },
           ]}
-          revealOffset={170}
+          revealOffset={160}
+          className="text-2xl md:text-4xl lg:text-5xl"
         />
       </section>
     </div>

@@ -136,6 +136,20 @@ export default function Navbar() {
     }
   }, [isHome]);
 
+  // Close mobile menu when clicking outside
+  React.useEffect(() => {
+    if (isMenuOpen) {
+      // Prevent body scroll when menu is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen]);
+
   const scrollToSection = (sectionId: string) => {
     scrollWithOffset(sectionId);
   };
@@ -173,208 +187,239 @@ export default function Navbar() {
   }, [isHome, hasLoaded]);
 
   return (
-    <nav
-      className={cn(
-        'absolute top-0 left-0 w-full z-50',
-        !isHome && 'text-primary-foreground',
-      )}
-    >
-      <div className='2xl:px-56 p-20 w-full h-28'>
-        <div className='flex items-center justify-between h-full'>
-          <Link
-            href='/'
-            className={cn(
-              'text-4xl font-bold',
-              !isHome && 'text-primary-foreground',
-            )}
-          >
-            mec
-          </Link>
-
-          <div className='hidden md:block'>
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      !isHome && 'text-primary-foreground',
-                    )}
-                  >
-                    About
-                  </NavigationMenuTrigger>
-                  <AnimatePresence mode='wait'>
-                    <NavigationMenuContent>
-                      <ul className='grid gap-3 p-6 md:w-[350px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]'>
-                        <li className='row-span-3'>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              href='/'
-                              className='flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md'
-                            >
-                              <div className='mb-2 mt-4 text-lg font-medium'>
-                                MEC
-                              </div>
-                              <p className='text-sm leading-tight text-muted-foreground'>
-                                Efficient. Impactful. Sustainable. We optimize
-                                energy, cut carbon, and drive independence for a
-                                greener future.
-                              </p>
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                        <ListItem href='/team' title='Who We Are'>
-                          Meet the passionate team behind MEC
-                        </ListItem>
-                        {scrollSections.map((section) => (
-                          <ListItem
-                            key={section.id}
-                            href={isHome ? section.href : '/'}
-                            title={section.title}
-                            onClick={(e) => {
-                              if (isHome) {
-                                handleSectionClick(e, section.id);
-                              } else {
-                                handleExternalSectionClick(e, section.id);
-                              }
-                            }}
-                          >
-                            {section.description}
-                          </ListItem>
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </AnimatePresence>
-                </NavigationMenuItem>
-
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      !isHome && 'text-primary-foreground',
-                    )}
-                  >
-                    Services
-                  </NavigationMenuTrigger>
-                  <AnimatePresence mode='wait'>
-                    <NavigationMenuContent>
-                      <ul className='grid w-[400px] gap-3 p-4 md:w-[350px] md:grid-cols-2 lg:w-[500px]'>
-                        {components.map((component) => (
-                          <ListItem
-                            key={component.title}
-                            href={component.href}
-                            title={component.title}
-                          >
-                            {component.description}
-                          </ListItem>
-                        ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </AnimatePresence>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-          </div>
-
-          <span
-            className={cn(
-              'text-md font-bold leading-none',
-              !isHome && 'text-primary-foreground',
-            )}
-          >
-            <Link href={mailtoLink} className='no-underline'>
-              Contact Us
-            </Link>
-          </span>
-
-          <div className='md:hidden'>
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className='p-2 focus:outline-none'
+    <>
+      <nav
+        className={cn(
+          'absolute top-0 left-0 w-full z-50',
+          !isHome && 'text-primary-foreground',
+        )}
+      >
+        <div className='px-8 md:px-20 2xl:px-56 w-full h-20 md:h-28'>
+          <div className='flex items-center justify-between h-full'>
+            <Link
+              href='/'
+              className={cn(
+                'text-3xl md:text-4xl font-bold',
+                !isHome && 'text-primary-foreground',
+              )}
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+              mec
+            </Link>
 
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className='absolute top-16 left-0 w-full bg-primary-foreground md:hidden'
-              >
-                <div className='px-4 pt-2 pb-4 space-y-2'>
-                  <Link
-                    href='/about'
-                    className={cn(
-                      'block py-2 hover:bg-accent',
-                      !isHome && 'text-primary-foreground',
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    About
-                  </Link>
-                  <Link
-                    href='/services'
-                    className={cn(
-                      'block py-2 hover:bg-accent',
-                      !isHome && 'text-primary-foreground',
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Services
-                  </Link>
-                  <Link
-                    href='/team'
-                    className={cn(
-                      'block py-2 hover:bg-accent',
-                      !isHome && 'text-primary-foreground',
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Our Team
-                  </Link>
-
-                  {scrollSections.map((section) => (
-                    <Link
-                      key={section.id}
-                      href={isHome ? section.href : '/'}
+            {/* Desktop Navigation */}
+            <div className='hidden md:block'>
+              <NavigationMenu>
+                <NavigationMenuList>
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger
                       className={cn(
-                        'block py-2 hover:bg-accent',
+                        navigationMenuTriggerStyle(),
                         !isHome && 'text-primary-foreground',
                       )}
-                      onClick={(e) => {
-                        if (isHome) {
-                          handleSectionClick(e, section.id);
-                          setIsMenuOpen(false);
-                        } else {
-                          handleExternalSectionClick(e, section.id);
-                          setIsMenuOpen(false);
-                        }
-                      }}
                     >
-                      {section.title}
-                    </Link>
-                  ))}
+                      About
+                    </NavigationMenuTrigger>
+                    <AnimatePresence mode='wait'>
+                      <NavigationMenuContent>
+                        <ul className='grid gap-3 p-8 md:w-[350px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]'>
+                          <li className='row-span-3'>
+                            <NavigationMenuLink asChild>
+                              <Link
+                                href='/'
+                                className='flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-8 no-underline outline-none focus:shadow-md'
+                              >
+                                <div className='mb-2 mt-4 text-lg font-medium'>
+                                  MEC
+                                </div>
+                                <p className='text-sm leading-tight text-muted-foreground'>
+                                  Efficient. Impactful. Sustainable. We optimize
+                                  energy, cut carbon, and drive independence for
+                                  a greener future.
+                                </p>
+                              </Link>
+                            </NavigationMenuLink>
+                          </li>
+                          <ListItem href='/team' title='Who We Are'>
+                            Meet the passionate team behind MEC
+                          </ListItem>
+                          {scrollSections.map((section) => (
+                            <ListItem
+                              key={section.id}
+                              href={isHome ? section.href : '/'}
+                              title={section.title}
+                              onClick={(e) => {
+                                if (isHome) {
+                                  handleSectionClick(e, section.id);
+                                } else {
+                                  handleExternalSectionClick(e, section.id);
+                                }
+                              }}
+                            >
+                              {section.description}
+                            </ListItem>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </AnimatePresence>
+                  </NavigationMenuItem>
 
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        !isHome && 'text-primary-foreground',
+                      )}
+                    >
+                      Services
+                    </NavigationMenuTrigger>
+                    <AnimatePresence mode='wait'>
+                      <NavigationMenuContent>
+                        <ul className='grid w-[400px] gap-3 p-4 md:w-[350px] md:grid-cols-2 lg:w-[500px]'>
+                          {components.map((component) => (
+                            <ListItem
+                              key={component.title}
+                              href={component.href}
+                              title={component.title}
+                            >
+                              {component.description}
+                            </ListItem>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </AnimatePresence>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </NavigationMenu>
+            </div>
+
+            {/* Desktop Contact Link */}
+            <span
+              className={cn(
+                'hidden md:block text-md font-bold leading-none',
+                !isHome && 'text-primary-foreground',
+              )}
+            >
+              <Link href={mailtoLink} className='no-underline'>
+                Contact Us
+              </Link>
+            </span>
+
+            {/* Mobile Menu Button */}
+            <div className='md:hidden'>
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className={cn(
+                  'p-2 focus:outline-none',
+                  !isHome && 'text-primary-foreground',
+                )}
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className='mobile-menu-container fixed inset-0 bg-white dark:bg-black z-50 md:hidden'
+          >
+            {/* Header with logo and close button on top of overlay */}
+            <div className='absolute top-0 left-0 w-full z-10'>
+              <div className='px-8 md:px-20 2xl:px-56 w-full h-20 md:h-28'>
+                <div className='flex items-center justify-between h-full'>
                   <Link
-                    href='/contact'
-                    className={cn(
-                      'block py-2 hover:bg-accent',
-                      !isHome && 'text-primary-foreground',
-                    )}
+                    href='/'
+                    className='text-3xl md:text-4xl font-bold text-foreground'
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    mec
+                  </Link>
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className='p-2 focus:outline-none text-foreground'
+                    aria-label='Close menu'
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className='px-8 md:px-20 2xl:px-56 p-6'>
+              {/* Menu Items */}
+              <div className='space-y-6 mt-20 md:mt-28'>
+                {/* About Section */}
+                <div>
+                  <h3 className='font-semibold text-lg mb-4'>About</h3>
+                  <div className='space-y-3'>
+                    <Link
+                      href='/team'
+                      className='block py-2 text-base hover:text-primary transition-colors'
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Who We Are
+                    </Link>
+                    {scrollSections.map((section) => (
+                      <Link
+                        key={section.id}
+                        href={isHome ? section.href : '/'}
+                        className='block py-2 text-base hover:text-primary transition-colors'
+                        onClick={(e) => {
+                          if (isHome) {
+                            handleSectionClick(e, section.id);
+                            setIsMenuOpen(false);
+                          } else {
+                            handleExternalSectionClick(e, section.id);
+                            setIsMenuOpen(false);
+                          }
+                        }}
+                      >
+                        {section.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Services Section */}
+                <div>
+                  <h3 className='font-semibold text-lg mb-4'>Services</h3>
+                  <div className='space-y-3'>
+                    {components.map((component) => (
+                      <Link
+                        key={component.title}
+                        href={component.href}
+                        className='block py-2 text-base hover:text-primary transition-colors'
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {component.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Contact Section */}
+                <div className='pt-6'>
+                  <Link
+                    href={mailtoLink}
+                    className='block py-3 px-6 bg-primary text-primary-foreground rounded-md text-center font-medium hover:bg-primary/90 transition-colors'
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Contact Us
                   </Link>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    </nav>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
