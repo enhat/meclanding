@@ -300,51 +300,62 @@ const HoverAnimatedButton = () => {
 };
 
 function ProjectsGrid() {
-  const projects = [
-    {
-      title: "Makerspace",
-      description: "Explore the endless capabilities of our workshops.",
-      header: <BentoImage src="/makerspace.png" />,
-      icon: <Lightbulb className="h-4 w-4 text-neutral-500" />,
-    },
-    {
-      title: "Washington Clean Energey Testbeds",
-      description: "We collaborate with WCET to create better products.",
-      header: <BentoImage src="/wcet.png" />,
-      icon: <Zap className="h-4 w-4 text-neutral-500" />,
-    },
-    {
-      title: "Consulting",
-      description: "We can help you find the most effective solution for you.",
-      header: <BentoImage src="/consulting.png" />,
-      icon: <MessageSquareQuote className="h-4 w-4 text-neutral-500" />,
-    },
-    {
-      title: "Other Projects",
-      description: "Batteries, Solar, Fuel Cells, and more!",
-      header: <BentoImage src="/other.png" />,
-      icon: <BatteryCharging className="h-4 w-4 text-neutral-500" />,
-    },
-  ];
-
   return (
     <BentoGrid className="m-0">
-      {projects.map((item, i) => (
-        <BentoGridItem
-          key={i}
-          title={item.title}
-          description={item.description}
-          header={item.header}
-          icon={item.icon}
-          className={i === 0 || i === 3 ? "md:col-span-2" : ""}
-        />
-      ))}
+      {/* 1) Makerspace (no link) */}
+      <BentoGridItem
+        title="Makerspace"
+        description="Explore the endless capabilities of our workshops."
+        header={<BentoImage src="/makerspace.png" />}
+        icon={<Lightbulb className="h-4 w-4 text-neutral-500" />}
+        className="md:col-span-2"
+      />
+
+      {/* 2) WCET (wrap entire item in <a>) */}
+      <BentoGridItem
+        title="Washington Clean Energy Testbeds" // fixed spelling
+        description="We collaborate with WCET to create better products."
+        header={<BentoImage src="/wcet.png" />}
+        icon={<Zap className="h-4 w-4 text-neutral-500" />}
+      />
+
+      {/* 3) Consulting (no link) */}
+      <BentoGridItem
+        title="Consulting"
+        description="We can help you find the most effective solution for you."
+        header={<BentoImage src="/consulting.png" />}
+        icon={<MessageSquareQuote className="h-4 w-4 text-neutral-500" />}
+      />
+
+      {/* 4) Other Projects (no link) */}
+      <BentoGridItem
+        title="Other Projects"
+        description="Batteries, Solar, Fuel Cells, and more!"
+        header={<BentoImage src="/other.png" />}
+        icon={<BatteryCharging className="h-4 w-4 text-neutral-500" />}
+        className="md:col-span-2"
+      />
     </BentoGrid>
   );
 }
 
 const BentoImage = ({ src }: { src?: string }) => (
-  <div className="relative flex w-full h-full min-h-[6rem] rounded-xl overflow-hidden border border-primary-foreground bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100">
+  <div
+    className="
+      relative
+      w-full
+      aspect-square            /* force 1:1 ratio, so all images stay the same height */
+      rounded-xl
+      overflow-hidden
+      border
+      border-primary-foreground
+      bg-gradient-to-br
+        from-neutral-200
+        dark:from-neutral-900
+        dark:to-neutral-800
+        to-neutral-100
+    "
+  >
     {src && (
       <Image src={src} alt="project image" fill className="object-cover" />
     )}

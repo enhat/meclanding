@@ -4,7 +4,7 @@ import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 export default function Team() {
   return (
     <>
-      <div className="bg-white h-screen w-full px-56 flex flex-col justify-center">
+      <div className="bg-white h-full w-full p-8 md:px-20 pt-40 2xl:pt-0 2xl:px-56 flex flex-col justify-center">
         <div>
           <div className="flex flex-col w-full">
             <span className="text-6xl font-bold text-primary-foreground mb-6">
@@ -39,8 +39,6 @@ export default function Team() {
           />
         </div>
       </div>
-
-      <div className="bg-white h-screen w-full px-56 flex flex-col justify-center"></div>
     </>
   );
 }

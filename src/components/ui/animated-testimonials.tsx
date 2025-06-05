@@ -41,7 +41,7 @@ export const AnimatedTestimonials = ({
 
   return (
     <div className='antialiased font-sans'>
-      <div className='relative grid grid-cols-1 md:grid-cols-2 gap-20'>
+      <div className='relative grid items-center grid-cols-1 lg:grid-cols-2 gap-20'>
         <div>
           <div className='relative h-[500px] w-full overflow-visible'>
             <AnimatePresence initial={false} mode='wait'>
