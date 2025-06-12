@@ -376,7 +376,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
               key={itemIndex}
               href={item.mailto ? `mailto:${item.mailto}` : undefined}
               className={cn(
-                'inline-flex relative items-center mx-1 text-primary-foreground cursor-pointer',
+                'inline-flex relative items-center mx-1 text-primary cursor-pointer',
                 className,
               )}
               onMouseEnter={() => {
@@ -447,10 +447,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
             <React.Fragment key={itemIndex}>
               <motion.span
                 key={itemIndex}
-                className={cn(
-                  'inline-block text-primary-foreground',
-                  className,
-                )}
+                className={cn('inline-block text-primary', className)}
                 variants={textVariants}
                 initial='hidden'
                 animate={isHighlighted ? 'visible' : 'hidden'}

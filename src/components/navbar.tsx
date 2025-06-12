@@ -190,8 +190,8 @@ export default function Navbar() {
     <>
       <nav
         className={cn(
-          'absolute top-0 left-0 w-full z-50',
-          !isHome && 'text-primary-foreground',
+          'left-0 w-full z-50 text-primary-foreground absolute top-0',
+          !isHome && 'text-primary bg-primary-foreground static',
         )}
       >
         <div className='px-8 md:px-20 2xl:px-56 w-full h-20 md:h-28'>
@@ -199,8 +199,8 @@ export default function Navbar() {
             <Link
               href='/'
               className={cn(
-                'text-3xl md:text-4xl font-bold',
-                !isHome && 'text-primary-foreground',
+                'text-3xl md:text-4xl font-bold text-primary-foreground',
+                !isHome && 'text-primary',
               )}
             >
               mec
@@ -213,8 +213,9 @@ export default function Navbar() {
                   <NavigationMenuItem>
                     <NavigationMenuTrigger
                       className={cn(
+                        'text-primary-foreground',
                         navigationMenuTriggerStyle(),
-                        !isHome && 'text-primary-foreground',
+                        !isHome && 'text-primary',
                       )}
                     >
                       About
@@ -266,8 +267,9 @@ export default function Navbar() {
                   <NavigationMenuItem>
                     <NavigationMenuTrigger
                       className={cn(
+                        'text-primary-foreground',
                         navigationMenuTriggerStyle(),
-                        !isHome && 'text-primary-foreground',
+                        !isHome && 'text-primary',
                       )}
                     >
                       Services
@@ -295,8 +297,8 @@ export default function Navbar() {
             {/* Desktop Contact Link */}
             <span
               className={cn(
-                'hidden md:block text-md font-bold leading-none',
-                !isHome && 'text-primary-foreground',
+                'hidden md:block text-md font-bold leading-none text-primary-foreground',
+                !isHome && 'text-primary',
               )}
             >
               <Link href={mailtoLink} className='no-underline'>
@@ -309,8 +311,8 @@ export default function Navbar() {
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className={cn(
-                  'p-2 focus:outline-none',
-                  !isHome && 'text-primary-foreground',
+                  'p-2 focus:outline-none text-primary-foreground',
+                  !isHome && 'text-primary',
                 )}
                 aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               >
@@ -337,14 +339,14 @@ export default function Navbar() {
                 <div className='flex items-center justify-between h-full'>
                   <Link
                     href='/'
-                    className='text-3xl md:text-4xl font-bold text-foreground'
+                    className='text-3xl md:text-4xl font-bold text-primary'
                     onClick={() => setIsMenuOpen(false)}
                   >
                     mec
                   </Link>
                   <button
                     onClick={() => setIsMenuOpen(false)}
-                    className='p-2 focus:outline-none text-foreground'
+                    className='p-2 focus:outline-none text-primary'
                     aria-label='Close menu'
                   >
                     <X size={24} />
@@ -358,11 +360,13 @@ export default function Navbar() {
               <div className='space-y-6 mt-20 md:mt-28'>
                 {/* About Section */}
                 <div>
-                  <h3 className='font-semibold text-lg mb-4'>About</h3>
+                  <h3 className='font-semibold text-lg text-primary mb-4'>
+                    About
+                  </h3>
                   <div className='space-y-3'>
                     <Link
                       href='/team'
-                      className='block py-2 text-base hover:text-primary transition-colors'
+                      className='block py-2 text-base hover:text-primary text-primary transition-colors'
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Who We Are
@@ -371,7 +375,7 @@ export default function Navbar() {
                       <Link
                         key={section.id}
                         href={isHome ? section.href : '/'}
-                        className='block py-2 text-base hover:text-primary transition-colors'
+                        className='block py-2 text-base hover:text-primary text-primary transition-colors'
                         onClick={(e) => {
                           if (isHome) {
                             handleSectionClick(e, section.id);
@@ -390,13 +394,15 @@ export default function Navbar() {
 
                 {/* Services Section */}
                 <div>
-                  <h3 className='font-semibold text-lg mb-4'>Services</h3>
+                  <h3 className='font-semibold text-lg text-primary mb-4'>
+                    Services
+                  </h3>
                   <div className='space-y-3'>
                     {components.map((component) => (
                       <Link
                         key={component.title}
                         href={component.href}
-                        className='block py-2 text-base hover:text-primary transition-colors'
+                        className='block py-2 text-base hover:text-primary text-primary transition-colors'
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {component.title}
@@ -409,7 +415,7 @@ export default function Navbar() {
                 <div className='pt-6'>
                   <Link
                     href={mailtoLink}
-                    className='block py-3 px-6 bg-primary text-primary-foreground rounded-md text-center font-medium hover:bg-primary/90 transition-colors'
+                    className='block py-3 px-6 bg-primary text-primary-foreground rounded-full text-center font-medium hover:bg-primary/90 transition-colors'
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Contact Us

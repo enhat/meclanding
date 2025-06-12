@@ -29,32 +29,25 @@ export default function RootLayout({
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       </head>
       <body className={cn(roboto.className, "w-full")}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+        <ClickSpark
+          sparkColor="#3b3b3b"
+          sparkSize={10}
+          sparkRadius={15}
+          sparkCount={8}
+          duration={250}
         >
-          <ClickSpark
-            sparkColor="#3b3b3b"
-            sparkSize={10}
-            sparkRadius={15}
-            sparkCount={8}
-            duration={250}
-          >
-            <div className="min-h-screen flex flex-col w-full">
-              <Navbar />
-              <main className="flex-grow w-screen">{children}</main>
-              <footer className="w-full bg-primary-foreground flex flex-col items-center justify-end p-12 gap-12">
-                <Separator />
-                <span>
-                  © 2025 Madden Electrochemical Consulting and/or its
-                  affiliates. All rights reserved.
-                </span>
-              </footer>
-            </div>
-          </ClickSpark>
-        </ThemeProvider>
+          <div className="min-h-screen flex flex-col w-full">
+            <Navbar />
+            <main className="w-screen">{children}</main>
+            <footer className="w-full bg-primary-foreground flex flex-col items-center justify-end p-12 gap-12 text-primary">
+              <Separator />
+              <span>
+                © 2025 Madden Electrochemical Consulting and/or its affiliates.
+                All rights reserved.
+              </span>
+            </footer>
+          </div>
+        </ClickSpark>
       </body>
     </html>
   );

@@ -124,25 +124,24 @@ export default function HomePage() {
           >
             <polygon
               points="0,62 100,25 100,100 0,100"
-              className="fill-primary"
+              className="fill-primary-foreground"
             />
           </svg>
         </div>
 
-        <div className="w-full h-screen z-20 flex xl:mt-20 2xl:mt-0">
-          <div className="2xl:w-1/2 w-full h-screen flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 md:px-20 px-8 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal pt-44">
-            <div className="flex flex-col gap-16 2xl:w-full xl:w-3/4 w-full">
+        <div className="w-full h-screen z-20 flex 2xl:mt-0 md:mt-20 mt-8">
+          <div className="2xl:w-1/2 w-full h-full flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 md:px-20 px-8 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal pt-44">
+            <div className="flex flex-col gap-10 lg:gap-16 2xl:w-full xl:w-3/4 sm:w-4/5 2xl:h-min">
               <TextGenerateEffect
-                className="2xl:text-9xl xl:text-7xl md:text-6xl sm:text-5xl text-4xl text-primary font-outline font-bold text-center 2xl:text-left"
+                className="2xl:text-9xl xl:text-7xl md:text-6xl sm:text-5xl text-4xl text-primary-foreground font-outline font-bold text-center 2xl:text-left"
                 words="Turn your ideas into reality."
               />
               <TextGenerateEffect
-                className="text-muted 2xl:text-2xl xl:text-lg lg:text-md text-sm leading-relaxed 2xl:text-left text-center"
+                className="text-primary 2xl:text-2xl xl:text-lg lg:text-md text-sm leading-relaxed 2xl:text-left text-center 2xl:p-0"
                 words="Madden Electrochemical Consulting helps inventors turn ideas into sustainable energy solutions, from R&D to production, with expert electrochemistry and recycling strategies."
                 duration={0.25}
                 staggerDur={0.05}
               />
-
               <HoverAnimatedButton />
             </div>
           </div>
@@ -160,7 +159,7 @@ export default function HomePage() {
                   alt="pic"
                   width={325}
                   height={325}
-                  className="rounded-xl border border-primary-foreground"
+                  className="rounded-xl border-secondary-foreground shadow-2xl"
                 />
               </motion.div>
             </motion.div>
@@ -178,7 +177,7 @@ export default function HomePage() {
                   alt="pic2"
                   width={350}
                   height={350}
-                  className="rounded-xl border border-primary-foreground"
+                  className="rounded-xl border-secondary-foreground shadow-2xl"
                 />
               </motion.div>
             </motion.div>
@@ -187,13 +186,13 @@ export default function HomePage() {
       </section>
 
       <section
-        className="h-screen w-full bg-primary 2xl:px-56 md:px-20 px-8 flex flex-col justify-center"
+        className="h-full py-20 w-full bg-primary-foreground 2xl:px-56 md:px-20 px-8 flex flex-col justify-center"
         id="services-section"
       >
-        <h2 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-6">
+        <h2 className="text-4xl md:text-6xl font-bold text-primary mb-6">
           Our Services
         </h2>
-        <p className="text-primary-foreground text-lg mb-10 lg:w-1/2">
+        <p className="text-secondary-foreground text-lg mb-10 lg:w-1/2">
           Efficient. Impactful. Sustainable. We optimize energy, cut carbon, and
           drive independence for a greener future.
         </p>
@@ -201,13 +200,13 @@ export default function HomePage() {
       </section>
 
       <section
-        className="h-screen w-full bg-primary gap-20 md:px-20 px-8 2xl:px-96 flex flex-col justify-center"
+        className="h-full py-20 w-full bg-primary-foreground gap-20 md:px-20 px-8 2xl:px-96 flex flex-col justify-center"
         id="mission-section"
         style={{ position: "relative" }}
       >
         <TextReveal
           textItems={textItems}
-          pixelsPerWord={10}
+          pixelsPerWord={5}
           revealOffset={0}
           className="text-2xl md:text-4xl lg:text-5xl leading-loose md:leading-relaxed"
         />
@@ -219,7 +218,7 @@ export default function HomePage() {
               mailto: "example@email.com",
             },
           ]}
-          revealOffset={160}
+          revealOffset={250}
           className="text-2xl md:text-4xl lg:text-5xl"
         />
       </section>
@@ -250,7 +249,7 @@ const HoverAnimatedButton = () => {
   return (
     <Button
       size="lg"
-      className="relative overflow-hidden"
+      className="relative overflow-hidden bg-muted shadow-md hover:shadow-lg transition duration-200 hover:bg-secondary"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleScroll}
@@ -301,41 +300,71 @@ const HoverAnimatedButton = () => {
 
 function ProjectsGrid() {
   return (
-    <BentoGrid className="m-0">
-      {/* 1) Makerspace (no link) */}
-      <BentoGridItem
-        title="Makerspace"
-        description="Explore the endless capabilities of our workshops."
-        header={<BentoImage src="/makerspace.png" />}
-        icon={<Lightbulb className="h-4 w-4 text-neutral-500" />}
-        className="md:col-span-2"
-      />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-fr">
+      {/* 1) Makerspace (spans 2 columns on md+) */}
+      <div className="group md:col-span-2 p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <BentoImage src="/makerspace.png" />
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Lightbulb className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
+            <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
+              Makerspace
+            </h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Explore the endless capabilities of our workshops.
+          </p>
+        </div>
+      </div>
 
-      {/* 2) WCET (wrap entire item in <a>) */}
-      <BentoGridItem
-        title="Washington Clean Energy Testbeds" // fixed spelling
-        description="We collaborate with WCET to create better products."
-        header={<BentoImage src="/wcet.png" />}
-        icon={<Zap className="h-4 w-4 text-neutral-500" />}
-      />
+      {/* 2) WCET (single column) */}
+      <div className="group p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <BentoImage src="/wcet.png" />
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
+            <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
+              Washington Clean Energy Testbeds
+            </h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            We collaborate with WCET to create better products.
+          </p>
+        </div>
+      </div>
 
-      {/* 3) Consulting (no link) */}
-      <BentoGridItem
-        title="Consulting"
-        description="We can help you find the most effective solution for you."
-        header={<BentoImage src="/consulting.png" />}
-        icon={<MessageSquareQuote className="h-4 w-4 text-neutral-500" />}
-      />
+      {/* 3) Consulting (single column) */}
+      <div className="group p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <BentoImage src="/consulting.png" />
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-2">
+            <MessageSquareQuote className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
+            <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
+              Consulting
+            </h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            We can help you find the most effective solution for you.
+          </p>
+        </div>
+      </div>
 
-      {/* 4) Other Projects (no link) */}
-      <BentoGridItem
-        title="Other Projects"
-        description="Batteries, Solar, Fuel Cells, and more!"
-        header={<BentoImage src="/other.png" />}
-        icon={<BatteryCharging className="h-4 w-4 text-neutral-500" />}
-        className="md:col-span-2"
-      />
-    </BentoGrid>
+      {/* 4) Other Projects (spans 2 columns on md+) */}
+      <div className="group md:col-span-2 p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <BentoImage src="/other.png" />
+        <div className="mt-4">
+          <div className="flex items-center gap-2 mb-2">
+            <BatteryCharging className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
+            <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
+              Other Projects
+            </h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Batteries, Solar, Fuel Cells, and more!
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -344,20 +373,28 @@ const BentoImage = ({ src }: { src?: string }) => (
     className="
       relative
       w-full
-      aspect-square            /* force 1:1 ratio, so all images stay the same height */
-      rounded-xl
+      h-40                     /* fixed height for all images */
+      rounded-lg
       overflow-hidden
       border
-      border-primary-foreground
+      border-primary-foreground-foreground
       bg-gradient-to-br
         from-neutral-200
         dark:from-neutral-900
         dark:to-neutral-800
         to-neutral-100
+      group-hover:scale-101
+      transition-transform
+      duration-300
     "
   >
     {src && (
-      <Image src={src} alt="project image" fill className="object-cover" />
+      <Image
+        src={src}
+        alt="project image"
+        fill
+        className="object-cover transition-transform duration-300 group-hover:scale-110"
+      />
     )}
   </div>
 );
