@@ -10,7 +10,6 @@ import {
   MessageSquareQuote,
   Zap,
 } from "lucide-react";
-import { BentoGrid, BentoGridItem } from "@/components/bento-grid";
 import TextReveal from "@/components/text-reveal";
 
 export default function HomePage() {
