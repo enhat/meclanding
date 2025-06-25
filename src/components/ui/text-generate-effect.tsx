@@ -48,14 +48,14 @@ export const TextGenerateEffect = ({
       }
     };
   }, [
-    // scope.current,
     onComplete,
     wordsArray.length,
     duration,
     animate,
     filter,
     totalDuration,
-  ]); //
+    staggerDur,
+  ]);
 
   const renderWords = () => (
     <motion.div ref={scope} style={{ display: 'inline-block' }}>

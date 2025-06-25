@@ -318,7 +318,7 @@ function ProjectsGrid() {
 
       {/* 2) WCET (single column) */}
       <div className="group p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <BentoImage src="/wcet.png" />
+        <BentoImage src="/WCET.png" />
         <div className="mt-4">
           <div className="flex items-center gap-2 mb-2">
             <Zap className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />

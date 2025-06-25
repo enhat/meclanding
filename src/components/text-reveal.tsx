@@ -215,7 +215,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
     previouslyVisibleRef.current = currentlyVisible;
 
     setIconStates(updatedIconStates);
-  }, [visibleWordCount, processedText]);
+  }, [visibleWordCount, processedText, iconStates]);
 
   if (allWords.length === 0) {
     return <div className={cn('w-full', className)} ref={componentRef}></div>;

@@ -25,7 +25,7 @@ type ScrollSection = {
 
 const getScrollOffsets = (): Record<string, number> => {
   return {
-    'mission-section': 270,
+    'mission-section': 0,
   };
 };
 
