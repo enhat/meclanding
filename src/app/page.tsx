@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import TextReveal from "@/components/text-reveal";
+import Link from "next/link";
 
 export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -205,8 +206,8 @@ export default function HomePage() {
       >
         <TextReveal
           textItems={textItems}
-          pixelsPerWord={5}
-          revealOffset={0}
+          pixelsPerWord={10}
+          revealOffset={200}
           className="text-2xl md:text-4xl lg:text-5xl leading-loose md:leading-relaxed"
         />
         <TextReveal
@@ -217,7 +218,7 @@ export default function HomePage() {
               mailto: "example@email.com",
             },
           ]}
-          revealOffset={250}
+          revealOffset={325}
           className="text-2xl md:text-4xl lg:text-5xl"
         />
       </section>
@@ -297,103 +298,86 @@ const HoverAnimatedButton = () => {
   );
 };
 
-function ProjectsGrid() {
+export function ProjectsGrid() {
+  const projects = [
+    {
+      key: "makerspace",
+      title: "Makerspace",
+      icon: Lightbulb,
+      description: "Explore the endless capabilities of our workshops.",
+      img: "/makerspace.png",
+      href: "/makerspace",
+    },
+    {
+      key: "wcet",
+      title: "Washington Clean Energy Testbeds",
+      icon: Zap,
+      description: "We collaborate with WCET to create better products.",
+      img: "/WCET.png",
+      href: "https://www.wcet.washington.edu/",
+    },
+    {
+      key: "consulting",
+      title: "Consulting",
+      icon: MessageSquareQuote,
+      description: "We can help you find the most effective solution for you.",
+      img: "/consulting.png",
+      href: "/consulting",
+    },
+    {
+      key: "other",
+      title: "Other Projects",
+      icon: BatteryCharging,
+      description: "Batteries, Solar, Fuel Cells, and more!",
+      img: "/other.png",
+      href: "https://www.coolamps.tech/about",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-fr">
-      {/* 1) Makerspace (spans 2 columns on md+) */}
-      <div className="group md:col-span-2 p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <BentoImage src="/makerspace.png" />
-        <div className="mt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Lightbulb className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
-            <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
-              Makerspace
-            </h3>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Explore the endless capabilities of our workshops.
-          </p>
-        </div>
-      </div>
+      {projects.map((project) => {
+        const spanClass =
+          project.key === "makerspace" || project.key === "other"
+            ? "md:col-span-2"
+            : "md:col-span-1";
+        const commonClasses = `${spanClass} group block p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1`;
 
-      {/* 2) WCET (single column) */}
-      <div className="group p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <BentoImage src="/WCET.png" />
-        <div className="mt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Zap className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
-            <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
-              Washington Clean Energy Testbeds
-            </h3>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            We collaborate with WCET to create better products.
-          </p>
-        </div>
-      </div>
+        // Determine wrapper component and props
+        const Wrapper = project.href.startsWith("http") ? "a" : Link;
+        const wrapperProps = project.href.startsWith("http")
+          ? {
+              href: project.href,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: commonClasses,
+            }
+          : { href: project.href, className: commonClasses };
 
-      {/* 3) Consulting (single column) */}
-      <div className="group p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <BentoImage src="/consulting.png" />
-        <div className="mt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <MessageSquareQuote className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
-            <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
-              Consulting
-            </h3>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            We can help you find the most effective solution for you.
-          </p>
-        </div>
-      </div>
-
-      {/* 4) Other Projects (spans 2 columns on md+) */}
-      <div className="group md:col-span-2 p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <BentoImage src="/other.png" />
-        <div className="mt-4">
-          <div className="flex items-center gap-2 mb-2">
-            <BatteryCharging className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
-            <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
-              Other Projects
-            </h3>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Batteries, Solar, Fuel Cells, and more!
-          </p>
-        </div>
-      </div>
+        return (
+          <Wrapper key={project.key} {...wrapperProps}>
+            <div className="relative w-full h-40 rounded-lg overflow-hidden border border-primary-foreground-foreground bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 group-hover:scale-101 transition-transform duration-300">
+              <Image
+                src={project.img}
+                alt={`${project.title} image`}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-110"
+              />
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <project.icon className="h-4 w-4 text-neutral-500 group-hover:text-primary transition-colors duration-300" />
+                <h3 className="font-semibold group-hover:text-primary transition-colors duration-300">
+                  {project.title}
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {project.description}
+              </p>
+            </div>
+          </Wrapper>
+        );
+      })}
     </div>
   );
 }
-
-const BentoImage = ({ src }: { src?: string }) => (
-  <div
-    className="
-      relative
-      w-full
-      h-40                     /* fixed height for all images */
-      rounded-lg
-      overflow-hidden
-      border
-      border-primary-foreground-foreground
-      bg-gradient-to-br
-        from-neutral-200
-        dark:from-neutral-900
-        dark:to-neutral-800
-        to-neutral-100
-      group-hover:scale-101
-      transition-transform
-      duration-300
-    "
-  >
-    {src && (
-      <Image
-        src={src}
-        alt="project image"
-        fill
-        className="object-cover transition-transform duration-300 group-hover:scale-110"
-      />
-    )}
-  </div>
-);
