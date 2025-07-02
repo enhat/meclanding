@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
 import { LucideIcon, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -21,14 +27,26 @@ interface ProcessedTextItem {
 
 interface TextRevealProps {
   textItems?: TextItem[];
-  iconSize?: number | 'auto'; // Allow 'auto' for adaptive sizing
-  iconSizeMultiplier?: number; // Multiplier for auto sizing (default 1.2)
+  iconSize?: number | 'auto';
+  iconSizeMultiplier?: number;
   className?: string;
   pixelsPerWord?: number;
   revealOffset?: number;
   leading?: 'tight' | 'snug' | 'normal' | 'relaxed' | 'loose' | string;
   underlineThickness?: 'thin' | 'normal' | 'thick' | 'auto';
 }
+
+const rafThrottle = (func: () => void) => {
+  let rafId: number | null = null;
+  return function () {
+    if (rafId === null) {
+      rafId = requestAnimationFrame(() => {
+        func();
+        rafId = null;
+      });
+    }
+  };
+};
 
 const TextReveal: React.FC<TextRevealProps> = ({
   textItems = [],
@@ -44,21 +62,15 @@ const TextReveal: React.FC<TextRevealProps> = ({
   const [computedIconSize, setComputedIconSize] = useState(24);
   const componentRef = useRef<HTMLDivElement>(null);
   const textMeasureRef = useRef<HTMLSpanElement>(null);
-  const initializedRef = useRef(false);
   const [hoveredItems, setHoveredItems] = useState<{
     [key: number]: boolean;
   }>({});
-
-  // State to track if specific icons are visible
   const [iconStates, setIconStates] = useState<{
     [key: number]: 'visible' | 'hidden' | 'clicked';
   }>({});
-
-  // Track previous visibility state to detect when items leave and re-enter view
   const previouslyVisibleRef = useRef<Set<number>>(new Set());
 
-  // Helper function to get appropriate leading class
-  const getLeadingClass = (leading: string) => {
+  const getLeadingClass = useCallback((leading: string) => {
     const leadingMap: { [key: string]: string } = {
       tight: 'leading-tight',
       snug: 'leading-snug',
@@ -66,117 +78,127 @@ const TextReveal: React.FC<TextRevealProps> = ({
       relaxed: 'leading-relaxed',
       loose: 'leading-loose',
     };
-
     return leadingMap[leading] || leading;
-  };
+  }, []);
 
-  // Helper function to get underline thickness based on text size
-  const getUnderlineStyle = (thickness: string) => {
+  const getUnderlineStyle = useCallback((thickness: string) => {
     if (thickness === 'auto') {
-      // Auto-scaling based on font size using em units
       return {
         height: '0.08em',
         bottom: '-0.15em',
       };
     }
-
     const thicknessMap: { [key: string]: { height: string; bottom: string } } =
       {
         thin: { height: '1px', bottom: '-4px' },
         normal: { height: '2px', bottom: '-6px' },
         thick: { height: '4px', bottom: '-8px' },
       };
-
     return thicknessMap[thickness] || thicknessMap.normal;
-  };
+  }, []);
 
-  // Calculate icon size based on text size
-  useEffect(() => {
-    if (iconSize === 'auto' && textMeasureRef.current) {
-      const computedStyle = window.getComputedStyle(textMeasureRef.current);
-      const fontSize = parseFloat(computedStyle.fontSize);
-      const newIconSize = Math.round(fontSize * iconSizeMultiplier);
-      setComputedIconSize(newIconSize);
-    } else if (typeof iconSize === 'number') {
-      setComputedIconSize(iconSize);
-    }
-  }, [iconSize, iconSizeMultiplier, className]);
+  const processTextItems = useCallback(
+    (items: TextItem[]): ProcessedTextItem[] => {
+      const processed: ProcessedTextItem[] = [];
+      if (!items || items.length === 0) return processed;
 
-  const processTextItems = (items: TextItem[]): ProcessedTextItem[] => {
-    const processed: ProcessedTextItem[] = [];
-
-    if (!items || items.length === 0) return processed;
-
-    items.forEach((item) => {
-      const words = item.text.split(' ');
-      if (item.contact) {
-        processed.push({
-          words,
-          contact: !!item.contact,
-          icon: item.icon,
-          mailto: item.mailto,
-        });
-      } else {
-        words.forEach((word) => {
+      items.forEach((item) => {
+        const words = item.text.split(' ');
+        if (item.contact) {
           processed.push({
-            words: [word],
-            contact: false,
+            words,
+            contact: !!item.contact,
+            icon: item.icon,
+            mailto: item.mailto,
           });
-        });
-      }
-    });
+        } else {
+          words.forEach((word) => {
+            processed.push({
+              words: [word],
+              contact: false,
+            });
+          });
+        }
+      });
+      return processed;
+    },
+    [],
+  );
 
-    return processed;
-  };
-
-  const processedText = useMemo(() => processTextItems(textItems), [textItems]);
+  const processedText = useMemo(
+    () => processTextItems(textItems),
+    [textItems, processTextItems],
+  );
   const allWords = useMemo(
     () => processedText.flatMap((item) => item.words),
     [processedText],
   );
   const totalWordCount = useMemo(() => allWords.length, [allWords]);
+  const underlineStyle = useMemo(
+    () => getUnderlineStyle(underlineThickness),
+    [underlineThickness, getUnderlineStyle],
+  );
 
-  // Update visibility status based on scroll position
   useEffect(() => {
-    const updateVisibleWords = () => {
-      if (!componentRef.current || totalWordCount === 0) return;
+    if (iconSize === 'auto' && textMeasureRef.current) {
+      const updateIconSize = () => {
+        if (textMeasureRef.current) {
+          const computedStyle = window.getComputedStyle(textMeasureRef.current);
+          const fontSize = parseFloat(computedStyle.fontSize);
+          const newIconSize = Math.round(fontSize * iconSizeMultiplier);
 
-      const componentRect = componentRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
+          if (Math.abs(newIconSize - computedIconSize) > 1) {
+            setComputedIconSize(newIconSize);
+          }
+        }
+      };
+      requestAnimationFrame(updateIconSize);
+    } else if (typeof iconSize === 'number') {
+      setComputedIconSize(iconSize);
+    }
+  }, [iconSize, iconSizeMultiplier, computedIconSize]);
 
-      const revealTriggerPoint = viewportHeight / 2 + revealOffset;
-      const distanceFromTrigger = componentRect.top - revealTriggerPoint;
+  const updateVisibleWords = useCallback(() => {
+    if (!componentRef.current || totalWordCount === 0) return;
 
-      if (distanceFromTrigger > 0) {
+    const componentRect = componentRef.current.getBoundingClientRect();
+    const revealTriggerPoint = window.innerHeight / 2 + revealOffset;
+    const distanceFromTrigger = componentRect.top - revealTriggerPoint;
+
+    if (distanceFromTrigger > 0) {
+      if (visibleWordCount !== 0) {
         setVisibleWordCount(0);
-        return;
       }
+      return;
+    }
 
-      const scrolledPastTrigger = Math.abs(distanceFromTrigger);
-      let newVisibleWordCount = Math.floor(scrolledPastTrigger / pixelsPerWord);
-      newVisibleWordCount = Math.min(newVisibleWordCount, totalWordCount);
+    const scrolledPastTrigger = Math.abs(distanceFromTrigger);
+    let newVisibleWordCount = Math.floor(scrolledPastTrigger / pixelsPerWord);
+    newVisibleWordCount = Math.min(newVisibleWordCount, totalWordCount);
+
+    if (newVisibleWordCount !== visibleWordCount) {
       setVisibleWordCount(newVisibleWordCount);
+    }
+  }, [totalWordCount, pixelsPerWord, revealOffset, visibleWordCount]);
 
-      if (!initializedRef.current && newVisibleWordCount > 0) {
-        initializedRef.current = true;
-      }
-    };
+  useEffect(() => {
+    const throttledUpdate = rafThrottle(updateVisibleWords);
 
-    window.addEventListener('scroll', updateVisibleWords);
-    window.addEventListener('resize', updateVisibleWords);
+    window.addEventListener('scroll', throttledUpdate, { passive: true });
+    window.addEventListener('resize', throttledUpdate, { passive: true });
 
     updateVisibleWords();
 
     return () => {
-      window.removeEventListener('scroll', updateVisibleWords);
-      window.removeEventListener('resize', updateVisibleWords);
+      window.removeEventListener('scroll', throttledUpdate);
+      window.removeEventListener('resize', throttledUpdate);
     };
-  }, [totalWordCount, pixelsPerWord, revealOffset]);
+  }, [updateVisibleWords]);
 
-  // Update icon states when visibility changes
   useEffect(() => {
     const currentlyVisible = new Set<number>();
     const updatedIconStates = { ...iconStates };
+    let hasChanges = false;
 
     processedText.forEach((item, itemIndex) => {
       if (!item.contact) return;
@@ -190,32 +212,64 @@ const TextReveal: React.FC<TextRevealProps> = ({
 
       const isHighlighted = visibleWordCount > endWordIndex;
 
-      // If item is currently highlighted
       if (isHighlighted) {
         currentlyVisible.add(itemIndex);
 
-        // If this is the first time we're seeing this item or it's re-entering view
         if (
           !previouslyVisibleRef.current.has(itemIndex) &&
           updatedIconStates[itemIndex] !== 'clicked'
         ) {
           updatedIconStates[itemIndex] = 'visible';
+          hasChanges = true;
         }
-      }
-      // If item is not highlighted and was previously visible
-      else if (previouslyVisibleRef.current.has(itemIndex)) {
-        // Reset the clicked state when item leaves view
+      } else if (previouslyVisibleRef.current.has(itemIndex)) {
         if (updatedIconStates[itemIndex] === 'clicked') {
           updatedIconStates[itemIndex] = 'hidden';
+          hasChanges = true;
         }
       }
     });
 
-    // Update previous visibility reference for next render
     previouslyVisibleRef.current = currentlyVisible;
 
-    setIconStates(updatedIconStates);
-  }, [visibleWordCount, processedText]);
+    if (hasChanges) {
+      setIconStates(updatedIconStates);
+    }
+  }, [visibleWordCount, processedText, iconStates]);
+
+  const handleMouseEnter = useCallback((itemIndex: number) => {
+    setHoveredItems((prev) => {
+      if (prev[itemIndex]) return prev;
+      return { ...prev, [itemIndex]: true };
+    });
+  }, []);
+
+  const handleMouseLeave = useCallback((itemIndex: number) => {
+    setHoveredItems((prev) => {
+      if (!prev[itemIndex]) return prev;
+      return { ...prev, [itemIndex]: false };
+    });
+  }, []);
+
+  const handleClick = useCallback((itemIndex: number) => {
+    setIconStates((prev) => ({
+      ...prev,
+      [itemIndex]: 'clicked',
+    }));
+  }, []);
+
+  const renderIcon = useCallback(
+    (IconComponent: LucideIcon) => {
+      return (
+        <IconComponent
+          className='transition-all duration-300'
+          size={computedIconSize}
+          strokeWidth={2}
+        />
+      );
+    },
+    [computedIconSize],
+  );
 
   if (allWords.length === 0) {
     return <div className={cn('w-full', className)} ref={componentRef}></div>;
@@ -297,7 +351,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
       },
     },
     visible: {
-      x: computedIconSize + 10, // Adjust text offset based on icon size
+      x: computedIconSize + 10,
       filter: 'blur(0px)',
       opacity: 1,
       transition: {
@@ -331,21 +385,8 @@ const TextReveal: React.FC<TextRevealProps> = ({
     },
   };
 
-  const renderIcon = (IconComponent: LucideIcon) => {
-    return (
-      <IconComponent
-        className='transition-all duration-300'
-        size={computedIconSize}
-        strokeWidth={2}
-      />
-    );
-  };
-
-  const underlineStyle = getUnderlineStyle(underlineThickness);
-
   const content = (
     <div className={getLeadingClass(leading)}>
-      {/* Hidden text element for measuring font size */}
       <span
         ref={textMeasureRef}
         className={cn('opacity-0 absolute pointer-events-none', className)}
@@ -367,7 +408,6 @@ const TextReveal: React.FC<TextRevealProps> = ({
           const text = item.words.join(' ');
           const IconComponent = item.icon || Send;
 
-          // Icon should be shown if it's in 'visible' state (not clicked yet)
           const shouldShowIcon =
             isHighlighted && iconStates[itemIndex] === 'visible';
 
@@ -379,19 +419,9 @@ const TextReveal: React.FC<TextRevealProps> = ({
                 'inline-flex relative items-center mx-1 text-primary cursor-pointer',
                 className,
               )}
-              onMouseEnter={() => {
-                setHoveredItems((prev) => ({ ...prev, [itemIndex]: true }));
-              }}
-              onMouseLeave={() => {
-                setHoveredItems((prev) => ({ ...prev, [itemIndex]: false }));
-              }}
-              onClick={() => {
-                // Mark as clicked when clicked
-                setIconStates((prev) => ({
-                  ...prev,
-                  [itemIndex]: 'clicked',
-                }));
-              }}
+              onMouseEnter={() => handleMouseEnter(itemIndex)}
+              onMouseLeave={() => handleMouseLeave(itemIndex)}
+              onClick={() => handleClick(itemIndex)}
             >
               <div
                 style={{
