@@ -15,6 +15,7 @@
     "@radix-ui/react-navigation-menu": "^1.2.5",
     "@radix-ui/react-separator": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-tooltip": "^1.2.7",
     "@react-three/fiber": "^9.0.2",
     "@react-three/postprocessing": "^3.0.3",
     "@tabler/icons-react": "^3.30.0",

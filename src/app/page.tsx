@@ -12,6 +12,12 @@ import {
 } from "lucide-react";
 import TextReveal from "@/components/text-reveal";
 import Link from "next/link";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -23,6 +29,34 @@ export default function HomePage() {
 
   const pic1X = useSpring(pic1RawX, { damping: 20, stiffness: 80 });
   const pic2X = useSpring(pic2RawX, { damping: 20, stiffness: 80 });
+
+  const features = [
+    {
+      icon: Lightbulb,
+      title: "Expert-Led Solutions",
+      description:
+        "We bring over 30 years of hands-on electrochemical expertise to tackle complex challenges with precision and insight.",
+    },
+    {
+      icon: Zap,
+      title: "From Idea to Impact",
+      description:
+        "Whether you’re in early-stage R&D or scaling to production, we accelerate innovation into real-world energy solutions.",
+    },
+    {
+      icon: BatteryCharging,
+      title: "Efficient and Sustainable",
+      description:
+        "Our strategies focus on reducing costs, boosting energy performance, and promoting environmental responsibility.",
+    },
+    {
+      icon: MessageSquareQuote,
+      title: "Clear, Collaborative Consulting",
+      description:
+        "We work side-by-side with you to ensure every solution is transparent, tailored, and technically sound.",
+      tooltip: true,
+    },
+  ];
 
   useEffect(() => {
     const video = videoRef.current;
@@ -135,7 +169,7 @@ export default function HomePage() {
 
         <div className="w-full h-screen z-20 flex">
           <div className="2xl:w-1/2 w-full h-full flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 md:px-20 px-8 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal 2xl:pt-44">
-            <div className="flex flex-col gap-10 lg:gap-16 2xl:w-full xl:w-3/4 sm:w-4/5 2xl:h-min">
+            <div className="flex flex-col gap-10  2xl:w-full xl:w-3/4 sm:w-4/5 2xl:h-min">
               <TextGenerateEffect
                 className="2xl:text-9xl xl:text-7xl md:text-6xl sm:text-5xl text-4xl text-primary-foreground font-outline font-bold text-center 2xl:text-left"
                 words="Turn your ideas into reality."
@@ -148,6 +182,31 @@ export default function HomePage() {
               />
               <HoverAnimatedButton />
             </div>
+
+            <TooltipProvider>
+              <div className="grid grid-cols-4 sm:grid-cols-4 md:gap-20 gap-8 bottom-0 absolute pb-10 md:pb-20 2xl:pb-10">
+                {features.map((feature, idx) => {
+                  const Icon = feature.icon;
+                  return (
+                    <Tooltip key={idx}>
+                      <div>
+                        <TooltipTrigger asChild>
+                          <div className="flex flex-col items-center text-center w-20">
+                            <Icon className="text-primary" />
+                            <span className="text-sm text-muted-foreground">
+                              {feature.title}
+                            </span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{feature.description}</p>
+                        </TooltipContent>
+                      </div>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </TooltipProvider>
           </div>
           <div className="w-1/2 h-screen absolute right-0 z-40 2xl:flex items-center justify-center hidden">
             <motion.div
@@ -210,8 +269,8 @@ export default function HomePage() {
       >
         <TextReveal
           textItems={textItems}
-          pixelsPerWord={10}
-          revealOffset={200}
+          pixelsPerWord={8}
+          revealOffset={240}
           className="text-2xl md:text-4xl lg:text-5xl leading-loose md:leading-relaxed"
         />
         <TextReveal
@@ -222,7 +281,7 @@ export default function HomePage() {
               mailto: "example@email.com",
             },
           ]}
-          revealOffset={240}
+          revealOffset={400}
           className="text-2xl md:text-4xl lg:text-5xl"
         />
       </section>
