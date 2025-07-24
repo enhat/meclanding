@@ -41,7 +41,7 @@ export default function HomePage() {
       icon: Zap,
       title: "From Idea to Impact",
       description:
-        "Whether you’re in early-stage R&D or scaling to production, we accelerate innovation into real-world energy solutions.",
+        "Whether you're in early-stage R&D or scaling to production, we accelerate innovation into real-world energy solutions.",
     },
     {
       icon: BatteryCharging,
@@ -51,7 +51,7 @@ export default function HomePage() {
     },
     {
       icon: MessageSquareQuote,
-      title: "Clear, Collaborative Consulting",
+      title: "Clear Consulting",
       description:
         "We work side-by-side with you to ensure every solution is transparent, tailored, and technically sound.",
       tooltip: true,
@@ -130,6 +130,29 @@ export default function HomePage() {
     },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.25,
+      },
+    },
+  };
+
+  const featureVariants = {
+    hidden: {
+      opacity: 0,
+    },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
+
   return (
     <div className="w-full h-full" ref={containerRef}>
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -167,7 +190,7 @@ export default function HomePage() {
           </svg>
         </div>
 
-        <div className="w-full h-screen z-20 flex">
+        <div className="w-full h-screen z-20 flex justify-center">
           <div className="2xl:w-1/2 w-full h-full flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 md:px-20 px-8 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal 2xl:pt-44">
             <div className="flex flex-col gap-10  2xl:w-full xl:w-3/4 sm:w-4/5 2xl:h-min">
               <TextGenerateEffect
@@ -182,32 +205,39 @@ export default function HomePage() {
               />
               <HoverAnimatedButton />
             </div>
-
-            <TooltipProvider>
-              <div className="grid grid-cols-4 sm:grid-cols-4 md:gap-20 gap-8 bottom-0 absolute pb-10 md:pb-20 2xl:pb-10">
-                {features.map((feature, idx) => {
-                  const Icon = feature.icon;
-                  return (
-                    <Tooltip key={idx}>
-                      <div>
-                        <TooltipTrigger asChild>
-                          <div className="flex flex-col items-center text-center w-20">
-                            <Icon className="text-primary" />
-                            <span className="text-sm text-muted-foreground">
-                              {feature.title}
-                            </span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{feature.description}</p>
-                        </TooltipContent>
-                      </div>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-            </TooltipProvider>
           </div>
+
+          <TooltipProvider>
+            <motion.div
+              className="grid grid-cols-4 sm:grid-cols-4 md:gap-20 gap-4 sm:gap-8 mt-auto pb-10 md:pb-20 2xl:pb-10 2xl:hidden z-50"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              {features.map((feature, idx) => {
+                const Icon = feature.icon;
+                return (
+                  <motion.div key={idx} variants={featureVariants}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex flex-col items-center text-center w-20">
+                          <Icon className="text-primary" />
+                          <span className="text-sm text-muted-foreground">
+                            {feature.title}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{feature.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </TooltipProvider>
+
           <div className="w-1/2 h-screen absolute right-0 z-40 2xl:flex items-center justify-center hidden">
             <motion.div
               className="absolute"
@@ -369,7 +399,7 @@ function ProjectsGrid() {
       icon: Lightbulb,
       description: "Explore the endless capabilities of our workshops.",
       img: "/makerspace.png",
-      href: "/makerspace",
+      href: "https://makerspacect.org/",
     },
     {
       key: "wcet",
