@@ -18,124 +18,70 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import config from "@/config/homepage-config.json";
+
+const iconMap = {
+  Lightbulb,
+  Zap,
+  BatteryCharging,
+  MessageSquareQuote,
+};
 
 export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { scrollY } = useScroll();
 
-  const pic1RawX = useTransform(scrollY, [-20, 500], [0, 550]);
-  const pic2RawX = useTransform(scrollY, [-20, 500], [0, 720]);
+  const pic1RawX = useTransform(
+    scrollY,
+    config.animation.parallax.scrollRange,
+    config.animation.parallax.pic1Transform,
+  );
+  const pic2RawX = useTransform(
+    scrollY,
+    config.animation.parallax.scrollRange,
+    config.animation.parallax.pic2Transform,
+  );
 
-  const pic1X = useSpring(pic1RawX, { damping: 20, stiffness: 80 });
-  const pic2X = useSpring(pic2RawX, { damping: 20, stiffness: 80 });
+  const pic1X = useSpring(pic1RawX, {
+    damping: config.animation.parallax.springConfig.damping,
+    stiffness: config.animation.parallax.springConfig.stiffness,
+  });
+  const pic2X = useSpring(pic2RawX, {
+    damping: config.animation.parallax.springConfig.damping,
+    stiffness: config.animation.parallax.springConfig.stiffness,
+  });
 
-  const features = [
-    {
-      icon: Lightbulb,
-      title: "Expert-Led Solutions",
-      description:
-        "We bring over 30 years of hands-on electrochemical expertise to tackle complex challenges with precision and insight.",
-    },
-    {
-      icon: Zap,
-      title: "From Idea to Impact",
-      description:
-        "Whether you're in early-stage R&D or scaling to production, we accelerate innovation into real-world energy solutions.",
-    },
-    {
-      icon: BatteryCharging,
-      title: "Efficient and Sustainable",
-      description:
-        "Our strategies focus on reducing costs, boosting energy performance, and promoting environmental responsibility.",
-    },
-    {
-      icon: MessageSquareQuote,
-      title: "Clear Consulting",
-      description:
-        "We work side-by-side with you to ensure every solution is transparent, tailored, and technically sound.",
-      tooltip: true,
-    },
-  ];
+  const features = config.features.map((feature) => ({
+    ...feature,
+    icon: iconMap[feature.icon as keyof typeof iconMap],
+  }));
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const ensureVideoPlays = async () => {
+    const playVideo = async () => {
       try {
-        if (video.readyState >= 2) {
-          await video.play();
-        } else {
-          video.addEventListener(
-            "canplay",
-            async () => {
-              try {
-                await video.play();
-              } catch (error) {
-                console.log("Video play failed:", error);
-              }
-            },
-            { once: true },
-          );
-        }
-      } catch (error) {
-        console.log("Video play failed:", error);
+        await video.play();
+      } catch {
+        console.log("Video autoplay blocked");
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (!document.hidden && video.paused) {
-        ensureVideoPlays();
-      }
-    };
-
-    const handleFocus = () => {
-      if (video.paused) {
-        ensureVideoPlays();
-      }
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && video.paused) {
-            ensureVideoPlays();
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-
-    if (video) {
-      observer.observe(video);
+    if (video.readyState >= 3) {
+      playVideo();
+    } else {
+      video.addEventListener("canplay", playVideo, { once: true });
     }
-
-    const timer = setTimeout(ensureVideoPlays, 100);
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      clearTimeout(timer);
-      observer.disconnect();
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
-    };
   }, []);
-
-  const textItems = [
-    {
-      text: "Madden Electrochemical Consulting drives invention and innovation from early-stage R&D to scale-up and production. Our dedicated team of consultants have over thirty years of experience that we leverage to tackle technical challenges for our clients with efficient and cost-effective solutions.",
-    },
-  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.25,
+        staggerChildren: config.animation.featureStagger,
       },
     },
   };
@@ -147,7 +93,7 @@ export default function HomePage() {
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.5,
+        duration: config.animation.featureDuration,
         ease: "easeOut",
       },
     },
@@ -164,10 +110,10 @@ export default function HomePage() {
             muted
             playsInline
             preload="auto"
+            poster={config.hero.video.poster}
             className="w-full h-full object-cover"
           >
-            <source src="/dither.webm" type="video/webm" />
-            <source src="/dither.mp4" type="video/mp4" />
+            <source src={config.hero.video.src} type="video/webm" />
             Your browser does not support the video tag.
           </video>
         </div>
@@ -191,15 +137,15 @@ export default function HomePage() {
         </div>
 
         <div className="w-full h-screen z-20 flex justify-center">
-          <div className="2xl:w-1/2 w-full h-full flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 md:px-20 px-8 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal 2xl:pt-44">
-            <div className="flex flex-col gap-10  2xl:w-full xl:w-3/4 sm:w-4/5 2xl:h-min">
+          <div className="2xl:w-1/2 w-full h-full flex flex-col absolute left-0 2xl:pl-56 2xl:pr-16 md:px-20 px-8 md:p-56 2xl:justify-normal justify-center items-center 2xl:items-normal 2xl:pt-46">
+            <div className="flex flex-col gap-10 2xl:w-full xl:w-3/4 sm:w-4/5 2xl:h-min">
               <TextGenerateEffect
                 className="2xl:text-9xl xl:text-7xl md:text-6xl sm:text-5xl text-4xl text-primary-foreground font-outline font-bold text-center 2xl:text-left"
-                words="Turn your ideas into reality."
+                words={config.hero.mainHeadline}
               />
               <TextGenerateEffect
                 className="text-primary 2xl:text-2xl xl:text-lg lg:text-md text-sm leading-relaxed 2xl:text-left text-center 2xl:p-0"
-                words="Madden Electrochemical Consulting helps inventors turn ideas into sustainable energy solutions, from R&D to production, with expert electrochemistry and recycling strategies."
+                words={config.hero.subHeadline}
                 duration={0.25}
                 staggerDur={0.05}
               />
@@ -209,7 +155,7 @@ export default function HomePage() {
 
           <TooltipProvider>
             <motion.div
-              className="grid grid-cols-4 sm:grid-cols-4 md:gap-20 gap-4 sm:gap-8 mt-auto pb-10 md:pb-20 2xl:pb-10 2xl:hidden z-50"
+              className="grid grid-cols-4 sm:grid-cols-4 md:gap-20 gap-4 sm:gap-8 mt-auto pb-24 2xl:pb-10 2xl:hidden z-50"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -244,14 +190,18 @@ export default function HomePage() {
               style={{ top: "22%", right: "25%" }}
               initial={{ x: -20, filter: "blur(10px)", opacity: 0 }}
               animate={{ x: 0, filter: "blur(0px)", opacity: 1 }}
-              transition={{ duration: 0.3, ease: "easeOut", delay: 0.05 }}
+              transition={{
+                duration: config.animation.imageReveal.duration,
+                ease: "easeOut",
+                delay: config.animation.imageReveal.pic1Delay,
+              }}
             >
               <motion.div style={{ x: pic1X }}>
                 <Image
-                  src="/Picture1.jpg"
-                  alt="pic"
-                  width={325}
-                  height={325}
+                  src={config.hero.images.pic1.src}
+                  alt={config.hero.images.pic1.alt}
+                  width={config.hero.images.pic1.width}
+                  height={config.hero.images.pic1.height}
                   className="rounded-xl border-secondary-foreground shadow-2xl"
                 />
               </motion.div>
@@ -262,14 +212,18 @@ export default function HomePage() {
               style={{ top: "35%", right: "40%" }}
               initial={{ x: -20, filter: "blur(10px)", opacity: 0 }}
               animate={{ x: 0, filter: "blur(0px)", opacity: 1 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              transition={{
+                duration: config.animation.imageReveal.duration,
+                ease: "easeOut",
+                delay: config.animation.imageReveal.pic2Delay,
+              }}
             >
               <motion.div style={{ x: pic2X }}>
                 <Image
-                  src="/Picture2.jpg"
-                  alt="pic2"
-                  width={350}
-                  height={350}
+                  src={config.hero.images.pic2.src}
+                  alt={config.hero.images.pic2.alt}
+                  width={config.hero.images.pic2.width}
+                  height={config.hero.images.pic2.height}
                   className="rounded-xl border-secondary-foreground shadow-2xl"
                 />
               </motion.div>
@@ -280,38 +234,36 @@ export default function HomePage() {
 
       <section
         className="h-full py-20 w-full bg-primary-foreground 2xl:px-56 md:px-20 px-8 flex flex-col justify-center"
-        id="services-section"
+        id={config.sections.services.id}
       >
         <h2 className="text-4xl md:text-6xl font-bold text-primary mb-6">
-          Our Services
+          {config.sections.services.title}
         </h2>
         <p className="text-secondary-foreground text-lg mb-10 lg:w-1/2">
-          Efficient. Impactful. Sustainable. We optimize energy, cut carbon, and
-          drive independence for a greener future.
+          {config.sections.services.subtitle}
         </p>
         <ProjectsGrid />
       </section>
 
       <section
         className="h-full py-20 w-full bg-primary-foreground gap-20 md:px-20 px-8 2xl:px-96 flex flex-col justify-center"
-        id="mission-section"
+        id={config.sections.mission.id}
         style={{ position: "relative" }}
       >
         <TextReveal
-          textItems={textItems}
-          pixelsPerWord={8}
-          revealOffset={240}
+          textItems={config.sections.mission.textItems}
+          pixelsPerWord={config.animation.textReveal.pixelsPerWord}
+          revealOffset={config.animation.textReveal.missionRevealOffset}
           className="text-2xl md:text-4xl lg:text-5xl leading-loose md:leading-relaxed"
         />
         <TextReveal
           textItems={[
             {
-              text: "Contact Us",
-              contact: true,
-              mailto: "example@email.com",
+              text: config.sections.mission.contact.text,
             },
           ]}
-          revealOffset={400}
+          isContactButton={true}
+          revealOffset={config.animation.textReveal.contactRevealOffset}
           className="text-2xl md:text-4xl lg:text-5xl"
         />
       </section>
@@ -323,7 +275,9 @@ const HoverAnimatedButton = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleScroll = () => {
-    const servicesSection = document.getElementById("services-section");
+    const servicesSection = document.getElementById(
+      config.sections.services.id,
+    );
     if (servicesSection) {
       servicesSection.scrollIntoView({ behavior: "smooth" });
     }
@@ -348,7 +302,7 @@ const HoverAnimatedButton = () => {
       onClick={handleScroll}
     >
       <div className="flex items-center">
-        <span>Explore our solutions!</span>
+        <span>{config.button.text}</span>
         <motion.div
           initial={{ width: 0, marginLeft: 0 }}
           animate={{
@@ -392,40 +346,10 @@ const HoverAnimatedButton = () => {
 };
 
 function ProjectsGrid() {
-  const projects = [
-    {
-      key: "makerspace",
-      title: "Makerspace",
-      icon: Lightbulb,
-      description: "Explore the endless capabilities of our workshops.",
-      img: "/makerspace.png",
-      href: "https://makerspacect.org/",
-    },
-    {
-      key: "wcet",
-      title: "Washington Clean Energy Testbeds",
-      icon: Zap,
-      description: "We collaborate with WCET to create better products.",
-      img: "/WCET.png",
-      href: "https://www.wcet.washington.edu/",
-    },
-    {
-      key: "consulting",
-      title: "Consulting",
-      icon: MessageSquareQuote,
-      description: "We can help you find the most effective solution for you.",
-      img: "/consulting.png",
-      href: "/consulting",
-    },
-    {
-      key: "other",
-      title: "Other Projects",
-      icon: BatteryCharging,
-      description: "Batteries, Solar, Fuel Cells, and more!",
-      img: "/other.png",
-      href: "https://www.coolamps.tech/about",
-    },
-  ];
+  const projects = config.projects.map((project) => ({
+    ...project,
+    icon: iconMap[project.icon as keyof typeof iconMap],
+  }));
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-fr">
@@ -436,7 +360,6 @@ function ProjectsGrid() {
             : "md:col-span-1";
         const commonClasses = `${spanClass} group block p-6 rounded-xl border bg-card text-card-foreground shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1`;
 
-        // Determine wrapper component and props
         const Wrapper = project.href.startsWith("http") ? "a" : Link;
         const wrapperProps = project.href.startsWith("http")
           ? {

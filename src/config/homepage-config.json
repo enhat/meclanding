@@ -1,0 +1,134 @@
+{
+  "hero": {
+    "mainHeadline": "Turn your ideas into reality.",
+    "subHeadline": "Madden Electrochemical Consulting helps inventors turn ideas into sustainable energy solutions, from R&D to production, with expert electrochemistry and recycling strategies.",
+    "video": {
+      "src": "/dither-compressed.webm",
+      "poster": "/dither-poster.png"
+    },
+    "images": {
+      "pic1": {
+        "src": "/Picture1.jpg",
+        "alt": "pic",
+        "width": 325,
+        "height": 325
+      },
+      "pic2": {
+        "src": "/Picture2.jpg",
+        "alt": "pic2",
+        "width": 350,
+        "height": 350
+      }
+    }
+  },
+  "features": [
+    {
+      "icon": "Lightbulb",
+      "title": "Expert-Led Solutions",
+      "description": "We bring over 30 years of hands-on electrochemical expertise to tackle complex challenges with precision and insight."
+    },
+    {
+      "icon": "Zap",
+      "title": "From Idea to Impact",
+      "description": "Whether you're in early-stage R&D or scaling to production, we accelerate innovation into real-world energy solutions."
+    },
+    {
+      "icon": "BatteryCharging",
+      "title": "Efficient and Sustainable",
+      "description": "Our strategies focus on reducing costs, boosting energy performance, and promoting environmental responsibility."
+    },
+    {
+      "icon": "MessageSquareQuote",
+      "title": "Clear Consulting",
+      "description": "We work side-by-side with you to ensure every solution is transparent, tailored, and technically sound.",
+      "tooltip": true
+    }
+  ],
+  "sections": {
+    "services": {
+      "id": "services-section",
+      "title": "Our Services",
+      "subtitle": "Efficient. Impactful. Sustainable. We optimize energy, cut carbon, and drive independence for a greener future."
+    },
+    "mission": {
+      "id": "mission-section",
+      "textItems": [
+        {
+          "text": "Madden Electrochemical Consulting drives invention and innovation from early-stage R&D to scale-up and production. Our dedicated team of consultants have over thirty years of experience that we leverage to tackle technical challenges for our clients with efficient and cost-effective solutions."
+        }
+      ],
+      "contact": {
+        "text": "Contact Us"
+      }
+    }
+  },
+  "projects": [
+    {
+      "key": "makerspace",
+      "title": "Makerspace",
+      "icon": "Lightbulb",
+      "description": "Explore the endless capabilities of our workshops.",
+      "img": "/makerspace.png",
+      "href": "https://makerspacect.org/"
+    },
+    {
+      "key": "wcet",
+      "title": "Washington Clean Energy Testbeds",
+      "icon": "Zap",
+      "description": "We collaborate with WCET to create better products.",
+      "img": "/WCET.png",
+      "href": "https://www.wcet.washington.edu/"
+    },
+    {
+      "key": "consulting",
+      "title": "Consulting",
+      "icon": "MessageSquareQuote",
+      "description": "We can help you find the most effective solution for you.",
+      "img": "/consulting.png",
+      "href": "/consulting"
+    },
+    {
+      "key": "other",
+      "title": "Other Projects",
+      "icon": "BatteryCharging",
+      "description": "Batteries, Solar, Fuel Cells, and more!",
+      "img": "/other.png",
+      "href": "https://www.coolamps.tech/about"
+    }
+  ],
+  "animation": {
+    "textReveal": {
+      "pixelsPerWord": 8,
+      "missionRevealOffset": 240,
+      "contactRevealOffset": 400
+    },
+    "parallax": {
+      "scrollRange": [
+        -20,
+        500
+      ],
+      "pic1Transform": [
+        0,
+        550
+      ],
+      "pic2Transform": [
+        0,
+        720
+      ],
+      "springConfig": {
+        "damping": 20,
+        "stiffness": 80
+      }
+    },
+    "featureStagger": 0.25,
+    "featureDuration": 0.5,
+    "imageReveal": {
+      "duration": 0.3,
+      "pic1Delay": 0.05,
+      "pic2Delay": 0
+    }
+  },
+  "button": {
+    "text": "Explore our solutions!"
+  }
+}

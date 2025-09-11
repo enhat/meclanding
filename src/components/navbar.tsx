@@ -14,6 +14,8 @@ import {
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import config from '@/config/navbar-config.json';
+import sharedConfig from '@/config/shared-config.json';
 
 type ScrollSection = {
   id: string;
@@ -24,48 +26,15 @@ type ScrollSection = {
 };
 
 const getScrollOffsets = (): Record<string, number> => {
-  return {
-    'mission-section': 0,
-  };
+  return config.scrollOffsets;
 };
 
-const components: { title: string; href: string; description: string }[] = [
-  {
-    title: 'RD&D Consulting',
-    href: '/services/rdd',
-    description: 'Our consulting services',
-  },
-  {
-    title: 'WCET Capabilities',
-    href: '/services/wcet',
-    description: 'Washington Clean Energy Testbeds',
-  },
-  {
-    title: 'Makerspace',
-    href: '/services/makerspace',
-    description: 'Explore our innovative workspace',
-  },
-];
+const components = config.navigation.services.links;
+const scrollSections: ScrollSection[] = config.navigation.about.scrollSections;
 
-const scrollSections: ScrollSection[] = [
-  {
-    id: 'services-section',
-    title: 'Our Projects',
-    href: '#services-section',
-    description: 'Pioneering work in clean energy technologies',
-  },
-  {
-    id: 'mission-section',
-    title: 'Our Mission',
-    href: '#mission-section',
-    description: 'Our commitment to sustainable innovation',
-    offset: getScrollOffsets()['mission-section'],
-  },
-];
-
-const email = 'example@example.com';
-const subject = '';
-const body = '';
+const email = sharedConfig.contact.email;
+const subject = sharedConfig.contact.subject;
+const body = sharedConfig.contact.body;
 const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
 const ListItem = React.forwardRef<
@@ -129,17 +98,15 @@ export default function Navbar() {
 
       setTimeout(() => {
         scrollWithOffset(sectionId);
-      }, 500);
+      }, config.animation.scrollDelay);
 
       const cleanUrl = window.location.pathname;
       window.history.replaceState(null, '', cleanUrl);
     }
   }, [isHome]);
 
-  // Close mobile menu when clicking outside
   React.useEffect(() => {
     if (isMenuOpen) {
-      // Prevent body scroll when menu is open
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -181,7 +148,7 @@ export default function Navbar() {
         setTimeout(() => {
           scrollWithOffset(scrollTarget);
           sessionStorage.removeItem('scrollTarget');
-        }, 500);
+        }, config.animation.scrollDelay);
       }
     }
   }, [isHome, hasLoaded]);
@@ -203,10 +170,9 @@ export default function Navbar() {
                 !isHome && 'text-primary',
               )}
             >
-              mec
+              {config.branding.logo}
             </Link>
 
-            {/* Desktop Navigation */}
             <div className='hidden md:block'>
               <NavigationMenu>
                 <NavigationMenuList>
@@ -218,7 +184,7 @@ export default function Navbar() {
                         !isHome && 'text-primary',
                       )}
                     >
-                      About
+                      {config.navigation.about.title}
                     </NavigationMenuTrigger>
                     <AnimatePresence mode='wait'>
                       <NavigationMenuContent>
@@ -230,19 +196,23 @@ export default function Navbar() {
                                 className='flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-8 no-underline outline-none focus:shadow-md'
                               >
                                 <div className='mb-2 mt-4 text-lg font-medium'>
-                                  MEC
+                                  {config.branding.logo.toUpperCase()}
                                 </div>
                                 <p className='text-sm leading-tight text-muted-foreground'>
-                                  Efficient. Impactful. Sustainable. We optimize
-                                  energy, cut carbon, and drive independence for
-                                  a greener future.
+                                  {sharedConfig.branding.description}
                                 </p>
                               </Link>
                             </NavigationMenuLink>
                           </li>
-                          <ListItem href='/team' title='Who We Are'>
-                            Meet the passionate team behind MEC
-                          </ListItem>
+                          {config.navigation.about.links.map((link) => (
+                            <ListItem
+                              key={link.title}
+                              href={link.href}
+                              title={link.title}
+                            >
+                              {link.description}
+                            </ListItem>
+                          ))}
                           {scrollSections.map((section) => (
                             <ListItem
                               key={section.id}
@@ -272,7 +242,7 @@ export default function Navbar() {
                         !isHome && 'text-primary',
                       )}
                     >
-                      Services
+                      {config.navigation.services.title}
                     </NavigationMenuTrigger>
                     <AnimatePresence mode='wait'>
                       <NavigationMenuContent>
@@ -294,7 +264,6 @@ export default function Navbar() {
               </NavigationMenu>
             </div>
 
-            {/* Desktop Contact Link */}
             <span
               className={cn(
                 'hidden md:block text-md font-bold leading-none text-primary-foreground',
@@ -302,11 +271,10 @@ export default function Navbar() {
               )}
             >
               <Link href={mailtoLink} className='no-underline'>
-                Contact Us
+                {sharedConfig.contact.linkText}
               </Link>
             </span>
 
-            {/* Mobile Menu Button */}
             <div className='md:hidden'>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -323,17 +291,15 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: config.animation.menuTransition.duration }}
             className='mobile-menu-container fixed inset-0 bg-white dark:bg-black z-50 md:hidden'
           >
-            {/* Header with logo and close button on top of overlay */}
             <div className='absolute top-0 left-0 w-full z-10'>
               <div className='px-8 md:px-20 2xl:px-56 w-full h-20 md:h-28'>
                 <div className='flex items-center justify-between h-full'>
@@ -342,7 +308,7 @@ export default function Navbar() {
                     className='text-3xl md:text-4xl font-bold text-primary'
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    mec
+                    {config.branding.logo}
                   </Link>
                   <button
                     onClick={() => setIsMenuOpen(false)}
@@ -356,21 +322,22 @@ export default function Navbar() {
             </div>
 
             <div className='px-8 md:px-20 2xl:px-56 p-6'>
-              {/* Menu Items */}
               <div className='space-y-6 mt-20 md:mt-28'>
-                {/* About Section */}
                 <div>
                   <h3 className='font-semibold text-lg text-primary mb-4'>
-                    About
+                    {config.navigation.about.title}
                   </h3>
                   <div className='space-y-3'>
-                    <Link
-                      href='/team'
-                      className='block py-2 text-base hover:text-primary text-primary transition-colors'
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Who We Are
-                    </Link>
+                    {config.navigation.about.links.map((link) => (
+                      <Link
+                        key={link.title}
+                        href={link.href}
+                        className='block py-2 text-base hover:text-primary text-primary transition-colors'
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {link.title}
+                      </Link>
+                    ))}
                     {scrollSections.map((section) => (
                       <Link
                         key={section.id}
@@ -392,10 +359,9 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                {/* Services Section */}
                 <div>
                   <h3 className='font-semibold text-lg text-primary mb-4'>
-                    Services
+                    {config.navigation.services.title}
                   </h3>
                   <div className='space-y-3'>
                     {components.map((component) => (
@@ -411,14 +377,13 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                {/* Contact Section */}
                 <div className='pt-6'>
                   <Link
                     href={mailtoLink}
                     className='block py-3 px-6 bg-primary text-primary-foreground rounded-full text-center font-medium hover:bg-primary/90 transition-colors'
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Contact Us
+                    {sharedConfig.contact.linkText}
                   </Link>
                 </div>
               </div>

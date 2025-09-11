@@ -1,515 +1,245 @@
 'use client';
 
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-} from 'react';
-import { LucideIcon, Send } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import sharedConfig from '@/config/shared-config.json';
 
 interface TextItem {
   text: string;
   contact?: boolean;
-  icon?: LucideIcon;
-  mailto?: string;
-}
-
-interface ProcessedTextItem {
-  words: string[];
-  contact?: boolean;
-  icon?: LucideIcon;
-  mailto?: string;
 }
 
 interface TextRevealProps {
   textItems?: TextItem[];
-  iconSize?: number | 'auto';
-  iconSizeMultiplier?: number;
   className?: string;
   pixelsPerWord?: number;
   revealOffset?: number;
-  leading?: 'tight' | 'snug' | 'normal' | 'relaxed' | 'loose' | string;
-  underlineThickness?: 'thin' | 'normal' | 'thick' | 'auto';
+  iconSize?: number | 'auto';
+  iconSizeMultiplier?: number;
+  isContactButton?: boolean;
 }
-
-const rafThrottle = (func: () => void) => {
-  let rafId: number | null = null;
-  return function () {
-    if (rafId === null) {
-      rafId = requestAnimationFrame(() => {
-        func();
-        rafId = null;
-      });
-    }
-  };
-};
 
 const TextReveal: React.FC<TextRevealProps> = ({
   textItems = [],
-  iconSize = 'auto',
-  iconSizeMultiplier = 1,
   className,
   pixelsPerWord = 15,
   revealOffset = 0,
-  leading = 'normal',
-  underlineThickness = 'auto',
+  iconSize = 'auto',
+  iconSizeMultiplier = 1,
+  isContactButton = false,
 }) => {
   const [visibleWordCount, setVisibleWordCount] = useState(0);
-  const [computedIconSize, setComputedIconSize] = useState(24);
+  const [isHovered, setIsHovered] = useState(false);
+  const [iconClicked, setIconClicked] = useState(false);
+  const [computedIconSize, setComputedIconSize] = useState<number>(24);
+
   const componentRef = useRef<HTMLDivElement>(null);
   const textMeasureRef = useRef<HTMLSpanElement>(null);
-  const [hoveredItems, setHoveredItems] = useState<{
-    [key: number]: boolean;
-  }>({});
-  const [iconStates, setIconStates] = useState<{
-    [key: number]: 'visible' | 'hidden' | 'clicked';
-  }>({});
-  const previouslyVisibleRef = useRef<Set<number>>(new Set());
+  const clickedAwaitingResetRef = useRef(false);
+  const scrolledAwayRef = useRef(false);
 
-  const getLeadingClass = useCallback((leading: string) => {
-    const leadingMap: { [key: string]: string } = {
-      tight: 'leading-tight',
-      snug: 'leading-snug',
-      normal: 'leading-normal',
-      relaxed: 'leading-relaxed',
-      loose: 'leading-loose',
-    };
-    return leadingMap[leading] || leading;
-  }, []);
+  const allWords = textItems.flatMap((item) => item.text.split(' '));
+  const totalWordCount = allWords.length;
 
-  const getUnderlineStyle = useCallback((thickness: string) => {
-    if (thickness === 'auto') {
-      return {
-        height: '0.08em',
-        bottom: '-0.15em',
-      };
-    }
-    const thicknessMap: { [key: string]: { height: string; bottom: string } } =
-      {
-        thin: { height: '1px', bottom: '-4px' },
-        normal: { height: '2px', bottom: '-6px' },
-        thick: { height: '4px', bottom: '-8px' },
-      };
-    return thicknessMap[thickness] || thicknessMap.normal;
-  }, []);
-
-  const processTextItems = useCallback(
-    (items: TextItem[]): ProcessedTextItem[] => {
-      const processed: ProcessedTextItem[] = [];
-      if (!items || items.length === 0) return processed;
-
-      items.forEach((item) => {
-        const words = item.text.split(' ');
-        if (item.contact) {
-          processed.push({
-            words,
-            contact: !!item.contact,
-            icon: item.icon,
-            mailto: item.mailto,
-          });
-        } else {
-          words.forEach((word) => {
-            processed.push({
-              words: [word],
-              contact: false,
-            });
-          });
-        }
-      });
-      return processed;
-    },
-    [],
-  );
-
-  const processedText = useMemo(
-    () => processTextItems(textItems),
-    [textItems, processTextItems],
-  );
-  const allWords = useMemo(
-    () => processedText.flatMap((item) => item.words),
-    [processedText],
-  );
-  const totalWordCount = useMemo(() => allWords.length, [allWords]);
-  const underlineStyle = useMemo(
-    () => getUnderlineStyle(underlineThickness),
-    [underlineThickness, getUnderlineStyle],
-  );
+  const email = sharedConfig.contact.email;
+  const subject = sharedConfig.contact.subject;
+  const body = sharedConfig.contact.body;
+  const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   useEffect(() => {
     if (iconSize === 'auto' && textMeasureRef.current) {
       const updateIconSize = () => {
-        if (textMeasureRef.current) {
-          const computedStyle = window.getComputedStyle(textMeasureRef.current);
-          const fontSize = parseFloat(computedStyle.fontSize);
-          const newIconSize = Math.round(fontSize * iconSizeMultiplier);
+        const el = textMeasureRef.current;
+        if (!el) return;
+        const computedStyle = window.getComputedStyle(el);
+        const fontSize = parseFloat(computedStyle.fontSize) || 16;
+        const newIconSize = Math.round(fontSize * iconSizeMultiplier);
+        setComputedIconSize((prev) =>
+          Math.abs(newIconSize - prev) > 1 ? newIconSize : prev,
+        );
+      };
 
-          if (Math.abs(newIconSize - computedIconSize) > 1) {
-            setComputedIconSize(newIconSize);
-          }
+      requestAnimationFrame(updateIconSize);
+
+      let rafId: number | null = null;
+      const handleResize = () => {
+        if (rafId === null) {
+          rafId = requestAnimationFrame(() => {
+            updateIconSize();
+            rafId = null;
+          });
         }
       };
-      requestAnimationFrame(updateIconSize);
+      window.addEventListener('resize', handleResize, { passive: true });
+      return () => window.removeEventListener('resize', handleResize);
     } else if (typeof iconSize === 'number') {
       setComputedIconSize(iconSize);
     }
-  }, [iconSize, iconSizeMultiplier, computedIconSize]);
+  }, [iconSize, iconSizeMultiplier]);
 
-  const updateVisibleWords = useCallback(() => {
-    if (!componentRef.current || totalWordCount === 0) return;
-
-    const componentRect = componentRef.current.getBoundingClientRect();
-    const revealTriggerPoint = window.innerHeight / 2 + revealOffset;
-    const distanceFromTrigger = componentRect.top - revealTriggerPoint;
-
-    if (distanceFromTrigger > 0) {
-      if (visibleWordCount !== 0) {
+  useEffect(() => {
+    const updateVisibleWords = () => {
+      if (!componentRef.current || totalWordCount === 0) return;
+      const rect = componentRef.current.getBoundingClientRect();
+      const triggerPoint = window.innerHeight / 2 + revealOffset;
+      const distance = rect.top - triggerPoint;
+      if (distance > 0) {
         setVisibleWordCount(0);
+        return;
       }
+      const scrolled = Math.abs(distance);
+      const newCount = Math.min(
+        Math.floor(scrolled / pixelsPerWord),
+        totalWordCount,
+      );
+      setVisibleWordCount(newCount);
+    };
+
+    const handle = () => requestAnimationFrame(updateVisibleWords);
+    window.addEventListener('scroll', handle, { passive: true });
+    window.addEventListener('resize', handle, { passive: true });
+    updateVisibleWords();
+    return () => {
+      window.removeEventListener('scroll', handle);
+      window.removeEventListener('resize', handle);
+    };
+  }, [totalWordCount, pixelsPerWord, revealOffset]);
+
+  const isFullyVisible = visibleWordCount >= totalWordCount;
+
+  useEffect(() => {
+    if (iconClicked) {
+      clickedAwaitingResetRef.current = true;
+      scrolledAwayRef.current = false;
+    }
+    if (!iconClicked) {
+      clickedAwaitingResetRef.current = false;
+      scrolledAwayRef.current = false;
+    }
+  }, [iconClicked]);
+
+  useEffect(() => {
+    if (!clickedAwaitingResetRef.current) return;
+    if (!isFullyVisible && !scrolledAwayRef.current) {
+      scrolledAwayRef.current = true;
       return;
     }
-
-    const scrolledPastTrigger = Math.abs(distanceFromTrigger);
-    let newVisibleWordCount = Math.floor(scrolledPastTrigger / pixelsPerWord);
-    newVisibleWordCount = Math.min(newVisibleWordCount, totalWordCount);
-
-    if (newVisibleWordCount !== visibleWordCount) {
-      setVisibleWordCount(newVisibleWordCount);
+    if (isFullyVisible && scrolledAwayRef.current) {
+      setIconClicked(false);
+      clickedAwaitingResetRef.current = false;
+      scrolledAwayRef.current = false;
     }
-  }, [totalWordCount, pixelsPerWord, revealOffset, visibleWordCount]);
+  }, [isFullyVisible]);
 
-  useEffect(() => {
-    const throttledUpdate = rafThrottle(updateVisibleWords);
+  const handleClick = () => {
+    setIconClicked(true);
+  };
 
-    window.addEventListener('scroll', throttledUpdate, { passive: true });
-    window.addEventListener('resize', throttledUpdate, { passive: true });
-
-    updateVisibleWords();
-
-    return () => {
-      window.removeEventListener('scroll', throttledUpdate);
-      window.removeEventListener('resize', throttledUpdate);
-    };
-  }, [updateVisibleWords]);
-
-  useEffect(() => {
-    const currentlyVisible = new Set<number>();
-    const updatedIconStates = { ...iconStates };
-    let hasChanges = false;
-
-    processedText.forEach((item, itemIndex) => {
-      if (!item.contact) return;
-
-      const endWordIndex =
-        processedText
-          .slice(0, itemIndex)
-          .reduce((acc, curr) => acc + curr.words.length, 0) +
-        item.words.length -
-        1;
-
-      const isHighlighted = visibleWordCount > endWordIndex;
-
-      if (isHighlighted) {
-        currentlyVisible.add(itemIndex);
-
-        if (
-          !previouslyVisibleRef.current.has(itemIndex) &&
-          updatedIconStates[itemIndex] !== 'clicked'
-        ) {
-          updatedIconStates[itemIndex] = 'visible';
-          hasChanges = true;
-        }
-      } else if (previouslyVisibleRef.current.has(itemIndex)) {
-        if (updatedIconStates[itemIndex] === 'clicked') {
-          updatedIconStates[itemIndex] = 'hidden';
-          hasChanges = true;
-        }
-      }
-    });
-
-    previouslyVisibleRef.current = currentlyVisible;
-
-    if (hasChanges) {
-      setIconStates(updatedIconStates);
-    }
-  }, [visibleWordCount, processedText, iconStates]);
-
-  const handleMouseEnter = useCallback((itemIndex: number) => {
-    setHoveredItems((prev) => {
-      if (prev[itemIndex]) return prev;
-      return { ...prev, [itemIndex]: true };
-    });
-  }, []);
-
-  const handleMouseLeave = useCallback((itemIndex: number) => {
-    setHoveredItems((prev) => {
-      if (!prev[itemIndex]) return prev;
-      return { ...prev, [itemIndex]: false };
-    });
-  }, []);
-
-  const handleClick = useCallback((itemIndex: number) => {
-    setIconStates((prev) => ({
-      ...prev,
-      [itemIndex]: 'clicked',
-    }));
-  }, []);
-
-  const renderIcon = useCallback(
-    (IconComponent: LucideIcon) => {
-      return (
-        <IconComponent
-          className='transition-all duration-300'
-          size={computedIconSize}
-          strokeWidth={2}
-        />
-      );
-    },
-    [computedIconSize],
-  );
-
-  if (allWords.length === 0) {
-    return <div className={cn('w-full', className)} ref={componentRef}></div>;
+  if (!textItems.length) {
+    return <div className={cn('w-full', className)} ref={componentRef} />;
   }
 
-  const isContactComponent =
-    processedText.length === 1 && processedText[0].contact;
-
-  const textVariants = {
-    hidden: {
-      y: 10,
-      opacity: 0.3,
-      filter: 'blur(0px)',
-      transition: { duration: 0.3 },
-    },
-    visible: {
-      y: 0,
-      opacity: 1,
-      filter: 'blur(0px)',
-      transition: { duration: 0.3 },
-    },
-  };
-
-  const contactIconVariants = {
-    initial: {
-      y: 40,
-      x: -40,
-      opacity: 0,
-      scale: 0.5,
-      filter: 'blur(0px)',
-    },
-    animate: {
-      y: 0,
-      x: 0,
-      opacity: 1,
-      scale: 1,
-      filter: 'blur(0px)',
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 20,
-      },
-    },
-    hover: {
-      y: 7,
-      x: -7,
-      filter: 'blur(0px)',
-      scale: 1,
-      opacity: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 400,
-        damping: 15,
-      },
-    },
-    exit: {
-      y: -100,
-      x: 100,
-      opacity: 0,
-      scale: 0.8,
-      filter: 'blur(2px)',
-      transition: {
-        duration: 0.25,
-        ease: 'easeIn',
-      },
-    },
-  };
-
-  const contactTextVariants = {
-    hidden: {
-      x: 0,
-      filter: 'blur(0px)',
-      opacity: 0.3,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 25,
-        delay: 0.2,
-      },
-    },
-    visible: {
-      x: computedIconSize + 10,
-      filter: 'blur(0px)',
-      opacity: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 25,
-      },
-    },
-  };
-
-  const underlineVariants = {
-    initial: {
-      opacity: 0,
-      width: '0%',
-    },
-    animate: {
-      opacity: 1,
-      width: '100%',
-      transition: {
-        duration: 0.4,
-        ease: 'easeOut',
-      },
-    },
-    exit: {
-      opacity: 0,
-      width: '0%',
-      transition: {
-        duration: 0.3,
-        ease: 'easeIn',
-      },
-    },
-  };
-
-  const content = (
-    <div className={getLeadingClass(leading)}>
-      <span
-        ref={textMeasureRef}
-        className={cn('opacity-0 absolute pointer-events-none', className)}
-        aria-hidden='true'
-      >
-        M
-      </span>
-
-      {processedText.map((item, itemIndex) => {
-        const startWordIndex = processedText
-          .slice(0, itemIndex)
-          .reduce((acc, curr) => acc + curr.words.length, 0);
-
-        const endWordIndex = startWordIndex + item.words.length - 1;
-
-        if (item.contact) {
-          const isHighlighted = visibleWordCount > endWordIndex;
-          const isHovered = hoveredItems[itemIndex] || false;
-          const text = item.words.join(' ');
-          const IconComponent = item.icon || Send;
-
-          const shouldShowIcon =
-            isHighlighted && iconStates[itemIndex] === 'visible';
-
-          return (
-            <motion.a
-              key={itemIndex}
-              href={item.mailto ? `mailto:${item.mailto}` : undefined}
-              className={cn(
-                'inline-flex relative items-center mx-1 text-primary cursor-pointer',
-                className,
-              )}
-              onMouseEnter={() => handleMouseEnter(itemIndex)}
-              onMouseLeave={() => handleMouseLeave(itemIndex)}
-              onClick={() => handleClick(itemIndex)}
-            >
-              <div
-                style={{
-                  width: `0px`,
-                  height: `${computedIconSize}px`,
-                }}
-              >
-                <AnimatePresence>
-                  {shouldShowIcon && (
-                    <motion.div
-                      className='absolute left-0'
-                      key={`icon-${itemIndex}`}
-                      initial='initial'
-                      animate={isHovered ? 'hover' : 'animate'}
-                      exit='exit'
-                      variants={contactIconVariants}
-                    >
-                      {renderIcon(IconComponent)}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <motion.span
-                className='relative inline-block'
-                variants={contactTextVariants}
-                animate={isHighlighted ? 'visible' : 'hidden'}
-              >
-                {text}
-                <AnimatePresence>
-                  {isHighlighted && (
-                    <motion.span
-                      className='absolute left-0 bg-primary-foreground'
-                      style={{
-                        height: underlineStyle.height,
-                        bottom: underlineStyle.bottom,
-                      }}
-                      initial='initial'
-                      animate='animate'
-                      exit='exit'
-                      variants={underlineVariants}
-                    />
-                  )}
-                </AnimatePresence>
-              </motion.span>
-            </motion.a>
-          );
-        } else {
-          const word = item.words[0];
-          const isHighlighted = visibleWordCount > startWordIndex;
-
-          return (
-            <React.Fragment key={itemIndex}>
-              <motion.span
-                key={itemIndex}
-                className={cn('inline-block text-primary', className)}
-                variants={textVariants}
-                initial='hidden'
-                animate={isHighlighted ? 'visible' : 'hidden'}
-              >
-                {word}
-              </motion.span>
-              <span className={className}> </span>
-            </React.Fragment>
-          );
-        }
-      })}
-    </div>
+  const measureSpan = (
+    <span
+      ref={textMeasureRef}
+      className={cn('opacity-0 absolute pointer-events-none')}
+      aria-hidden='true'
+    >
+      M
+    </span>
   );
 
-  if (isContactComponent) {
+  if (isContactButton) {
+    const IconComponent = Send;
+
     return (
-      <motion.div
-        className={cn('w-full', className)}
-        ref={componentRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.5 }}
-      >
-        {content}
-      </motion.div>
+      <div className={cn('w-full', className)} ref={componentRef}>
+        {measureSpan}
+        <motion.a
+          href={mailtoLink}
+          className='inline-flex relative items-center text-primary cursor-pointer'
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={handleClick}
+        >
+          <div style={{ width: 0, height: `${computedIconSize}px` }}>
+            <AnimatePresence>
+              {isFullyVisible && (
+                <motion.div
+                  key='contact-icon'
+                  className='absolute left-0'
+                  initial={{ y: 40, x: -40, opacity: 0, scale: 0.5 }}
+                  animate={
+                    iconClicked
+                      ? { y: -140, x: 140, opacity: 0, scale: 0.8 }
+                      : isHovered
+                        ? { y: 7, x: -7, opacity: 1, scale: 1 }
+                        : { y: 0, x: 0, opacity: 1, scale: 1 }
+                  }
+                  exit={{ y: -100, x: 100, opacity: 0, scale: 0.8 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                >
+                  <IconComponent size={computedIconSize} strokeWidth={2} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <motion.span
+            className='relative inline-block'
+            animate={{
+              x: isFullyVisible ? computedIconSize + 10 : 0,
+              opacity: isFullyVisible ? 1 : 0.3,
+            }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          >
+            {allWords.join(' ')}
+            <AnimatePresence>
+              {isFullyVisible && (
+                <motion.span
+                  className='absolute left-0 bg-primary-foreground'
+                  style={{
+                    height: '0.08em',
+                    bottom: '-0.15em',
+                  }}
+                  initial={{ opacity: 0, width: '0%' }}
+                  animate={{ opacity: 1, width: '100%' }}
+                  exit={{ opacity: 0, width: '0%' }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                />
+              )}
+            </AnimatePresence>
+          </motion.span>
+        </motion.a>
+      </div>
     );
   }
 
   return (
-    <div className={cn('w-full', className)} ref={componentRef}>
-      {content}
+    <div
+      className={cn('w-full', className)}
+      ref={componentRef}
+      style={{ lineHeight: '1.75' }}
+    >
+      {measureSpan}
+      {allWords.map((word, index) => (
+        <React.Fragment key={index}>
+          <motion.span
+            className='inline-block text-primary'
+            initial={{ y: 10, opacity: 0.3 }}
+            animate={{
+              y: visibleWordCount > index ? 0 : 10,
+              opacity: visibleWordCount > index ? 1 : 0.3,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            {word}
+          </motion.span>
+          <span> </span>
+        </React.Fragment>
+      ))}
     </div>
   );
 };

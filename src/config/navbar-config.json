@@ -1,0 +1,61 @@
+{
+  "branding": {
+    "logo": "mec"
+  },
+  "navigation": {
+    "about": {
+      "title": "About",
+      "links": [
+        {
+          "title": "Who We Are",
+          "href": "/team",
+          "description": "Meet the passionate team behind MEC"
+        }
+      ],
+      "scrollSections": [
+        {
+          "id": "services-section",
+          "title": "Our Projects",
+          "href": "#services-section",
+          "description": "Pioneering work in clean energy technologies"
+        },
+        {
+          "id": "mission-section",
+          "title": "Our Mission",
+          "href": "#mission-section",
+          "description": "Our commitment to sustainable innovation",
+          "offset": 0
+        }
+      ]
+    },
+    "services": {
+      "title": "Services",
+      "links": [
+        {
+          "title": "RD&D Consulting",
+          "href": "/consulting",
+          "description": "Our consulting services"
+        },
+        {
+          "title": "WCET Capabilities",
+          "href": "https://www.wcet.washington.edu/",
+          "description": "Washington Clean Energy Testbeds"
+        },
+        {
+          "title": "Makerspace",
+          "href": "https://makerspacect.org/",
+          "description": "Explore our innovative workspace"
+        }
+      ]
+    }
+  },
+  "scrollOffsets": {
+    "mission-section": 0
+  },
+  "animation": {
+    "menuTransition": {
+      "duration": 0.2
+    },
+    "scrollDelay": 500
+  }
+}
