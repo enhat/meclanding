@@ -40,7 +40,10 @@ const TextReveal: React.FC<TextRevealProps> = ({
   const clickedAwaitingResetRef = useRef(false);
   const scrolledAwayRef = useRef(false);
 
-  const allWords = textItems.flatMap((item) => item.text.split(' '));
+  const allWords = React.useMemo(
+    () => textItems.flatMap((item) => item.text.split(' ').filter(Boolean)),
+    [textItems],
+  );
   const totalWordCount = allWords.length;
 
   const email = sharedConfig.contact.email;
